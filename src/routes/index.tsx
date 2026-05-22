@@ -19,7 +19,7 @@ function Splash() {
   return (
     <main className="relative flex min-h-dvh flex-col bg-background text-foreground">
       <header className="px-6 pt-8 sm:px-10 sm:pt-10">
-        <span className="font-serif text-lg tracking-tight">iCBIG</span>
+        <span className="font-serif tracking-tight text-6xl">iCBIG</span>
       </header>
 
       <section className="flex flex-1 items-center justify-center px-6 sm:px-10">
