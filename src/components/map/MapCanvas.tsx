@@ -45,13 +45,22 @@ export function MapCanvas({
 
   const [token, setToken] = useState<string | null>(null);
   useEffect(() => {
-    loadConfig().then((c) => setToken(c.mapboxToken || ""));
+    loadConfig().then((c) => {
+      console.log("[MapCanvas] mapbox token received:", c.mapboxToken ? `${c.mapboxToken.slice(0, 8)}…` : "(empty)");
+      setToken(c.mapboxToken || "");
+    });
   }, []);
 
   // Init map
   useEffect(() => {
     if (!containerRef.current || !token) return;
-    const map = createMap(containerRef.current, token);
+    let map: mapboxgl.Map;
+    try {
+      map = createMap(containerRef.current, token);
+    } catch (err) {
+      console.error("[MapCanvas] mapbox-gl init failed:", err);
+      return;
+    }
     mapRef.current = map;
 
     if (isDesktop) {
