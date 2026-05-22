@@ -44,11 +44,31 @@ export function MapCanvas({
   onSelectRef.current = onSelect;
 
   const [token, setToken] = useState<string | null>(null);
+  const [visibleError, setVisibleError] = useState<string | null>(null);
+
   useEffect(() => {
-    loadConfig().then((c) => {
-      console.log("[MapCanvas] mapbox token received:", c.mapboxToken ? `${c.mapboxToken.slice(0, 8)}…` : "(empty)");
-      setToken(c.mapboxToken || "");
-    });
+    loadConfig()
+      .then((c) => {
+        console.log(
+          "[MapCanvas] mapbox token received:",
+          c.mapboxToken ? `${c.mapboxToken.slice(0, 8)}…` : "(empty)",
+        );
+
+        if (!c.mapboxToken) {
+          setVisibleError("Missing MAPBOX_TOKEN in Cloud secrets.");
+          setToken("");
+          return;
+        }
+
+        setVisibleError(null);
+        setToken(c.mapboxToken);
+      })
+      .catch((error: unknown) => {
+        const message =
+          error instanceof Error ? error.message : "Unknown config error";
+        setVisibleError(`Failed to load runtime config: ${message}`);
+        setToken("");
+      });
   }, []);
 
   // Init map
@@ -59,8 +79,19 @@ export function MapCanvas({
       map = createMap(containerRef.current, token);
     } catch (err) {
       console.error("[MapCanvas] mapbox-gl init failed:", err);
+      const message =
+        err instanceof Error ? err.message : "Unknown Mapbox initialization error";
+      setVisibleError(`Mapbox initialization failed: ${message}`);
       return;
     }
+
+    const handleMapError = (event: { error?: Error }) => {
+      const message = event.error?.message ?? "Unknown Mapbox error";
+      console.error("[MapCanvas] mapbox runtime error:", event.error ?? event);
+      setVisibleError(`Mapbox error: ${message}`);
+    };
+
+    setVisibleError(null);
     mapRef.current = map;
 
     if (isDesktop) {
@@ -77,6 +108,7 @@ export function MapCanvas({
     map.on("zoom", handle);
     map.on("move", handle);
     map.on("load", handle);
+    map.on("error", handleMapError);
 
     return () => {
       markersRef.current.forEach((e) => {
@@ -85,6 +117,7 @@ export function MapCanvas({
         queueMicrotask(() => r.unmount());
       });
       markersRef.current.clear();
+      map.off("error", handleMapError);
       map.remove();
       mapRef.current = null;
     };
@@ -210,16 +243,16 @@ export function MapCanvas({
     }
   }
 
-  if (token === "") {
+  if (visibleError) {
     return (
       <div
         className="absolute inset-0 flex items-center justify-center px-6 text-center"
         style={{ backgroundColor: "#1a1d22" }}
       >
-        <p className="max-w-sm text-sm text-white/40">
-          Add <code className="text-white/70">MAPBOX_TOKEN</code> in
-          Cloud → Secrets to load the map.
-        </p>
+        <div className="max-w-sm space-y-3">
+          <p className="text-sm text-white/80">Map debug error</p>
+          <p className="text-sm text-white/55">{visibleError}</p>
+        </div>
       </div>
     );
   }
