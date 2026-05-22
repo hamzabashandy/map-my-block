@@ -23,9 +23,9 @@ function Splash() {
       </header>
 
       <section className="flex flex-1 items-center justify-center px-6 sm:px-10">
-        <div className="mx-auto flex max-w-xl flex-col items-center text-center">
+        <div className="mx-auto flex max-w-[640px] flex-col items-center text-center">
           <h1 className="sr-only">iCBIG — Neighbourhood directory</h1>
-          <p className="text-balance text-[15px] leading-relaxed text-foreground/85 sm:text-base">
+          <p className="text-balance text-lg leading-relaxed text-foreground/85 sm:text-xl">
             iCBIG is an NGO working to strengthen local neighbourhoods and local
             economies by fostering collaboration between businesses, community
             organizations, residents, and students — through networking,
