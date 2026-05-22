@@ -40,6 +40,7 @@ export function SidebarContent({
   onSelect,
   tab,
   onTabChange,
+  dragHandlers,
 }: Props) {
   const filtered = useMemo(
     () => filterBusinesses(businesses, query, activeCategories),
@@ -49,10 +50,15 @@ export function SidebarContent({
     ? businesses.find((b) => b.id === selectedId) ?? null
     : null;
 
+  const stopDrag = (e: React.SyntheticEvent) => e.stopPropagation();
+
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 pb-3 pt-4">
+      {/* Header (draggable on mobile) */}
+      <div
+        {...(dragHandlers ?? {})}
+        className={`flex items-center gap-3 px-4 pb-3 pt-4 ${dragHandlers ? "touch-none select-none" : ""}`}
+      >
         <span
           className="flex h-8 w-8 items-center justify-center rounded-full"
           style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
@@ -68,6 +74,9 @@ export function SidebarContent({
         <button
           type="button"
           onClick={onRefresh}
+          onPointerDown={stopDrag}
+          onTouchStart={stopDrag}
+          onMouseDown={stopDrag}
           aria-label="Refresh directory"
           className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground"
         >
@@ -78,7 +87,12 @@ export function SidebarContent({
       {/* Search + pills (hidden on detail) */}
       {!selected && (
         <div className="space-y-3 px-3 pb-3">
-          <SearchBar value={query} onChange={onQueryChange} />
+          <div
+            {...(dragHandlers ?? {})}
+            className={dragHandlers ? "touch-none" : ""}
+          >
+            <SearchBar value={query} onChange={onQueryChange} />
+          </div>
           <CategoryPills active={activeCategories} onToggle={onToggleCategory} />
         </div>
       )}
