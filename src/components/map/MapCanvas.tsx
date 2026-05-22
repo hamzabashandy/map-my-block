@@ -260,8 +260,8 @@ export function MapCanvas({
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0"
-      style={{ backgroundColor: "#1a1d22" }}
+      className="absolute inset-0 z-0"
+      style={{ backgroundColor: "#1a1d22", width: "100%", height: "100%", minHeight: "100%" }}
     />
   );
 }
