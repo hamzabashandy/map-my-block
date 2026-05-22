@@ -4,6 +4,9 @@ export const DEFAULT_CENTER: [number, number] = [-75.683846, 45.393636];
 export const DEFAULT_ZOOM = 16;
 export const MIN_ZOOM = 13;
 export const MAX_ZOOM = 19;
+export const MORPH_START = 16.5;
+export const MORPH_END = 17.5;
+export const MORPH_THRESHOLD = 17;
 
 export function createMap(
   container: HTMLElement,
