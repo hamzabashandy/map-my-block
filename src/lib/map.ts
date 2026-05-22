@@ -13,7 +13,7 @@ export function createMap(
   mapboxgl.accessToken = token;
   return new mapboxgl.Map({
     container,
-    style: "mapbox://styles/mapbox/dark-v11",
+    style: "mapbox://styles/hamzabashandy/cmpggtba2008x01scgc585vii",
     center: DEFAULT_CENTER,
     zoom: DEFAULT_ZOOM,
     attributionControl: false,
