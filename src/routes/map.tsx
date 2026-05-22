@@ -46,7 +46,7 @@ function MapPage() {
     if (id && !isDesktop) setSnap(2);
   };
 
-  const sidebar = (
+  const renderSidebar = (dragHandlers?: import("../components/map/BottomSheet").SheetDragHandlers) => (
     <SidebarContent
       businesses={items}
       loading={loading}
@@ -60,6 +60,7 @@ function MapPage() {
       onSelect={handleSelect}
       tab={tab}
       onTabChange={setTab}
+      dragHandlers={dragHandlers}
     />
   );
 
@@ -82,11 +83,11 @@ function MapPage() {
               "0 10px 40px rgba(0,0,0,0.4), 0 0 0 0.5px rgba(255,255,255,0.04)",
           }}
         >
-          {sidebar}
+          {renderSidebar()}
         </aside>
       ) : (
         <BottomSheet snap={snap} onSnapChange={setSnap}>
-          {sidebar}
+          {(handlers) => renderSidebar(handlers)}
         </BottomSheet>
       )}
     </main>
