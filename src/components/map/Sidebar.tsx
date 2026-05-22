@@ -1,10 +1,6 @@
-import { Map as MapIcon } from "lucide-react";
+import { Map as MapIcon, RefreshCw } from "lucide-react";
 import { useMemo } from "react";
-import {
-  BUSINESSES,
-  type Business,
-  type CategoryId,
-} from "../../data/businesses";
+import { type Business, type CategoryId } from "../../data/businesses";
 import { AboutTab } from "./AboutTab";
 import { BusinessList } from "./BusinessList";
 import { CategoryPills } from "./CategoryPills";
@@ -15,6 +11,10 @@ import { SearchBar } from "./SearchBar";
 export type Tab = "places" | "about" | "contact";
 
 type Props = {
+  businesses: Business[];
+  loading: boolean;
+  error: string | null;
+  onRefresh: () => void;
   query: string;
   onQueryChange: (v: string) => void;
   activeCategories: Set<CategoryId>;
@@ -23,11 +23,13 @@ type Props = {
   onSelect: (id: string | null) => void;
   tab: Tab;
   onTabChange: (t: Tab) => void;
-  /** Hide header/search/pills/tabs when collapsed on mobile */
-  compact?: boolean;
 };
 
 export function SidebarContent({
+  businesses,
+  loading,
+  error,
+  onRefresh,
   query,
   onQueryChange,
   activeCategories,
@@ -37,12 +39,12 @@ export function SidebarContent({
   tab,
   onTabChange,
 }: Props) {
-  const filtered = useMemo(() => filterBusinesses(query, activeCategories), [
-    query,
-    activeCategories,
-  ]);
+  const filtered = useMemo(
+    () => filterBusinesses(businesses, query, activeCategories),
+    [businesses, query, activeCategories],
+  );
   const selected = selectedId
-    ? BUSINESSES.find((b) => b.id === selectedId) ?? null
+    ? businesses.find((b) => b.id === selectedId) ?? null
     : null;
 
   return (
@@ -55,12 +57,20 @@ export function SidebarContent({
         >
           <MapIcon className="h-4 w-4 text-foreground" />
         </span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="font-serif text-[15px] leading-tight">iCBIG</div>
           <div className="text-[11.5px] text-muted-foreground">
             Neighbourhood directory
           </div>
         </div>
+        <button
+          type="button"
+          onClick={onRefresh}
+          aria-label="Refresh directory"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+        </button>
       </div>
 
       {/* Search + pills (hidden on detail) */}
@@ -78,7 +88,29 @@ export function SidebarContent({
             list: (
               <div className="h-full overflow-y-auto pb-2">
                 {tab === "places" && (
-                  <BusinessList items={filtered} onSelect={onSelect} />
+                  <>
+                    {error ? (
+                      <div className="px-4 py-8 text-center text-[13px] text-muted-foreground">
+                        <p>Couldn't load the directory.</p>
+                        <p className="mt-1 text-[12px] text-white/30">
+                          {error}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={onRefresh}
+                          className="mt-3 rounded-full bg-white/[0.06] px-3 py-1.5 text-[12px] text-foreground hover:bg-white/[0.1]"
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    ) : loading && businesses.length === 0 ? (
+                      <div className="px-4 py-10 text-center text-[13px] text-muted-foreground">
+                        Loading neighbourhood…
+                      </div>
+                    ) : (
+                      <BusinessList items={filtered} onSelect={onSelect} />
+                    )}
+                  </>
                 )}
                 {tab === "about" && <AboutTab />}
                 {tab === "contact" && <ContactTab />}
@@ -166,11 +198,12 @@ function PanelSwap({
 }
 
 function filterBusinesses(
+  items: Business[],
   query: string,
   active: Set<CategoryId>,
 ): Business[] {
   const q = query.trim().toLowerCase();
-  return BUSINESSES.filter((b) => {
+  return items.filter((b) => {
     if (active.size > 0 && !active.has(b.category)) return false;
     if (!q) return true;
     return (
