@@ -64,3 +64,20 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Mapbox chrome — hide logo + attribution (handled separately per terms) */
+.mapboxgl-ctrl-logo,
+.mapboxgl-ctrl-attrib {
+  display: none !important;
+}
+.mapboxgl-ctrl-group {
+  background: rgba(20, 20, 22, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(12px);
+}
+.mapboxgl-ctrl-group button {
+  background-color: transparent !important;
+}
+.mapboxgl-ctrl-group button span {
+  filter: invert(1) brightness(1.4);
+}
