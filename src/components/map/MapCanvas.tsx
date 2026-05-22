@@ -1,11 +1,10 @@
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { CATEGORIES, type Business } from "../../data/businesses";
 import { createMap, morphProgress } from "../../lib/map";
-
-const TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined;
+import { loadConfig } from "../../lib/runtime-config";
 
 const STATUS_DOT: Record<Business["status"], string> = {
   open: "#7BB661",
@@ -44,10 +43,15 @@ export function MapCanvas({
   selectedRef.current = selectedId;
   onSelectRef.current = onSelect;
 
+  const [token, setToken] = useState<string | null>(null);
+  useEffect(() => {
+    loadConfig().then((c) => setToken(c.mapboxToken || ""));
+  }, []);
+
   // Init map
   useEffect(() => {
-    if (!containerRef.current || !TOKEN) return;
-    const map = createMap(containerRef.current, TOKEN);
+    if (!containerRef.current || !token) return;
+    const map = createMap(containerRef.current, token);
     mapRef.current = map;
 
     if (isDesktop) {
@@ -76,7 +80,7 @@ export function MapCanvas({
       mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDesktop]);
+  }, [isDesktop, token]);
 
   // Sync markers with business list
   useEffect(() => {
@@ -197,15 +201,15 @@ export function MapCanvas({
     }
   }
 
-  if (!TOKEN) {
+  if (token === "") {
     return (
       <div
         className="absolute inset-0 flex items-center justify-center px-6 text-center"
         style={{ backgroundColor: "#1a1d22" }}
       >
         <p className="max-w-sm text-sm text-white/40">
-          Set <code className="text-white/70">VITE_MAPBOX_TOKEN</code> in your
-          environment to load the map.
+          Add <code className="text-white/70">MAPBOX_TOKEN</code> in
+          Cloud → Secrets to load the map.
         </p>
       </div>
     );

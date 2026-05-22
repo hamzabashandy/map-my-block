@@ -6,8 +6,7 @@ import {
   type Business,
   type CategoryId,
 } from "../data/businesses";
-
-const CSV_URL = import.meta.env.VITE_SHEET_CSV_URL as string | undefined;
+import { loadConfig } from "./runtime-config";
 
 type RawRow = Record<string, unknown>;
 
@@ -60,11 +59,12 @@ function mapRow(row: RawRow): Business | null {
 }
 
 export async function fetchBusinesses(): Promise<Business[]> {
-  if (!CSV_URL) {
+  const { sheetCsvUrl } = await loadConfig();
+  if (!sheetCsvUrl) {
     // No sheet configured — fall back to seeded data so the UI still works.
     return FALLBACK;
   }
-  const res = await fetch(CSV_URL, { cache: "no-store" });
+  const res = await fetch(sheetCsvUrl, { cache: "no-store" });
   if (!res.ok) throw new Error(`Sheet fetch failed (${res.status})`);
   const text = await res.text();
   const parsed = Papa.parse<RawRow>(text, {
