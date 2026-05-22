@@ -7,12 +7,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const SNAPS = [0.22, 0.55, 0.92] as const;
 type SnapIndex = 0 | 1 | 2;
 
+const DRAG_THRESHOLD = 8;
+
+export type SheetDragHandlers = {
+  onPointerDown: (e: React.PointerEvent) => void;
+  onPointerMove: (e: React.PointerEvent) => void;
+  onPointerUp: (e: React.PointerEvent) => void;
+  onPointerCancel: (e: React.PointerEvent) => void;
+};
+
 export function BottomSheet({
   children,
   snap,
   onSnapChange,
 }: {
-  children: React.ReactNode;
+  children: (handlers: SheetDragHandlers) => React.ReactNode;
   snap: SnapIndex;
   onSnapChange: (s: SnapIndex) => void;
 }) {
@@ -21,6 +30,7 @@ export function BottomSheet({
     startY: number;
     startHeight: number;
     pointerId: number;
+    moved: boolean;
   } | null>(null);
   const [dragHeight, setDragHeight] = useState<number | null>(null);
 
@@ -33,18 +43,23 @@ export function BottomSheet({
   );
 
   const onPointerDown = (e: React.PointerEvent) => {
-    (e.target as Element).setPointerCapture(e.pointerId);
+    (e.target as Element).setPointerCapture?.(e.pointerId);
     dragState.current = {
       startY: e.clientY,
       startHeight: heightForSnap(snap),
       pointerId: e.pointerId,
+      moved: false,
     };
-    setDragHeight(heightForSnap(snap));
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
     if (!dragState.current) return;
     const dy = e.clientY - dragState.current.startY;
+    if (!dragState.current.moved) {
+      if (Math.abs(dy) < DRAG_THRESHOLD) return;
+      dragState.current.moved = true;
+      setDragHeight(dragState.current.startHeight);
+    }
     const next = Math.min(
       viewportHeight() * 0.96,
       Math.max(60, dragState.current.startHeight - dy),
@@ -53,9 +68,19 @@ export function BottomSheet({
   };
 
   const onPointerUp = () => {
-    if (!dragState.current) return;
+    const state = dragState.current;
+    if (!state) return;
+    dragState.current = null;
+
+    if (!state.moved) {
+      // Tap — toggle between expanded/half
+      const next: SnapIndex = snap === 2 ? 1 : 2;
+      setDragHeight(null);
+      onSnapChange(next);
+      return;
+    }
+
     const current = dragHeight ?? heightForSnap(snap);
-    // Snap to nearest
     let nearest: SnapIndex = 0;
     let best = Infinity;
     SNAPS.forEach((frac, i) => {
@@ -65,9 +90,15 @@ export function BottomSheet({
         nearest = i as SnapIndex;
       }
     });
-    dragState.current = null;
     setDragHeight(null);
     onSnapChange(nearest);
+  };
+
+  const handlers: SheetDragHandlers = {
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onPointerCancel: onPointerUp,
   };
 
   // Re-evaluate height when viewport resizes
@@ -93,10 +124,7 @@ export function BottomSheet({
     >
       {/* Drag handle */}
       <div
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
+        {...handlers}
         className="flex h-7 cursor-grab touch-none items-center justify-center active:cursor-grabbing"
       >
         <span className="h-1 w-9 rounded-full bg-white/20" />
@@ -107,7 +135,7 @@ export function BottomSheet({
           overflow: isFullyExpanded ? "auto" : "hidden",
         }}
       >
-        {children}
+        {children(handlers)}
       </div>
     </div>
   );
