@@ -5,6 +5,7 @@ import { MapCanvas } from "../components/map/MapCanvas";
 import { SidebarContent, type Tab } from "../components/map/Sidebar";
 import type { CategoryId } from "../data/businesses";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { useBusinesses } from "../lib/data";
 
 export const Route = createFileRoute("/map")({
   component: MapPage,
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/map")({
 
 function MapPage() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const { items, loading, error, refresh } = useBusinesses();
   const [query, setQuery] = useState("");
   const [activeCategories, setActiveCategories] = useState<Set<CategoryId>>(
     () => new Set(),
@@ -46,6 +48,10 @@ function MapPage() {
 
   const sidebar = (
     <SidebarContent
+      businesses={items}
+      loading={loading}
+      error={error}
+      onRefresh={refresh}
       query={query}
       onQueryChange={setQuery}
       activeCategories={activeCategories}
@@ -59,7 +65,12 @@ function MapPage() {
 
   return (
     <main className="relative h-dvh w-full overflow-hidden bg-background">
-      <MapCanvas />
+      <MapCanvas
+        businesses={items}
+        selectedId={selectedId}
+        onSelect={(id) => handleSelect(id)}
+        isDesktop={isDesktop}
+      />
 
       {isDesktop ? (
         <aside
