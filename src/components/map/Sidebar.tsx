@@ -24,6 +24,7 @@ type Props = {
   onSelect: (id: string | null) => void;
   tab: Tab;
   onTabChange: (t: Tab) => void;
+  dragHandlers?: SheetDragHandlers;
 };
 
 export function SidebarContent({
