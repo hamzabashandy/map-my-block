@@ -18,6 +18,8 @@ export function createMap(
     style: "mapbox://styles/hamzabashandy/cmpggtba2008x01scgc585vii",
     center: DEFAULT_CENTER,
     zoom: DEFAULT_ZOOM,
+    minZoom: MIN_ZOOM,
+    maxZoom: MAX_ZOOM,
     attributionControl: false,
     pitchWithRotate: false,
     dragRotate: false,
