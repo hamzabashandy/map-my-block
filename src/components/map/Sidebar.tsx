@@ -2,6 +2,7 @@ import { Map as MapIcon, RefreshCw } from "lucide-react";
 import { useMemo } from "react";
 import { type Business, type CategoryId } from "../../data/businesses";
 import { AboutTab } from "./AboutTab";
+import type { SheetDragHandlers } from "./BottomSheet";
 import { BusinessList } from "./BusinessList";
 import { CategoryPills } from "./CategoryPills";
 import { ContactTab } from "./ContactTab";
