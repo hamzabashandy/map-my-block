@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
 
 function Splash() {
   return (
-    <main className="relative flex min-h-dvh flex-col bg-background text-foreground">
+    <main className="relative flex min-h-dvh flex-col text-foreground">
       <video
         className="pointer-events-none fixed inset-0 -z-10 h-full w-full object-cover opacity-60"
         autoPlay
