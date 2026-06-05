@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
+import videoAsset from "@/assets/ICBIG_Main_Placeholder_720.mov.asset.json";
 
 export const Route = createFileRoute("/")({
   component: Splash,
@@ -18,6 +19,16 @@ export const Route = createFileRoute("/")({
 function Splash() {
   return (
     <main className="relative flex min-h-dvh flex-col bg-background text-foreground">
+      <video
+        className="pointer-events-none fixed inset-0 -z-10 h-full w-full object-cover opacity-60"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        src={videoAsset.url}
+      />
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-background/40" />
       <header className="px-6 pt-8 sm:px-10 sm:pt-10">
         <span className="font-serif tracking-tight text-6xl">iCBIG</span>
       </header>
