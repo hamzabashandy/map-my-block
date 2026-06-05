@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
+import { useEffect, useRef } from "react";
 import videoAsset from "@/assets/ICBIRG_Placeholder.mov.asset.json";
 
 export const Route = createFileRoute("/")({
@@ -16,19 +17,69 @@ export const Route = createFileRoute("/")({
   }),
 });
 
+const PLAYBACK_RATE = 0.5;
+const HOLD_MS = 10000;
+const FADE_MS = 1500;
+const BASE_OPACITY = 0.6;
+
 function Splash() {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.playbackRate = PLAYBACK_RATE;
+
+    let timeouts: ReturnType<typeof setTimeout>[] = [];
+
+    const onRate = () => {
+      video.playbackRate = PLAYBACK_RATE;
+    };
+
+    const onEnded = () => {
+      // Hold on last frame
+      timeouts.push(
+        setTimeout(() => {
+          // Fade out
+          video.style.opacity = "0";
+          timeouts.push(
+            setTimeout(() => {
+              video.currentTime = 0;
+              video.playbackRate = PLAYBACK_RATE;
+              void video.play();
+              // Fade back in
+              requestAnimationFrame(() => {
+                video.style.opacity = String(BASE_OPACITY);
+              });
+            }, FADE_MS),
+          );
+        }, HOLD_MS),
+      );
+    };
+
+    video.addEventListener("ratechange", onRate);
+    video.addEventListener("ended", onEnded);
+    return () => {
+      video.removeEventListener("ratechange", onRate);
+      video.removeEventListener("ended", onEnded);
+      timeouts.forEach(clearTimeout);
+    };
+  }, []);
+
   return (
     <main className="relative flex min-h-dvh flex-col text-foreground">
       <video
-        className="pointer-events-none fixed inset-0 -z-10 h-full w-full object-cover opacity-60"
+        ref={videoRef}
+        className="pointer-events-none fixed inset-0 -z-10 h-full w-full object-cover"
+        style={{ opacity: BASE_OPACITY, transition: `opacity ${FADE_MS}ms ease-in-out` }}
         autoPlay
-        loop
         muted
         playsInline
         preload="auto"
         src={videoAsset.url}
       />
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-background/40" />
+
       <header className="px-6 pt-8 sm:px-10 sm:pt-10">
         <span className="font-serif tracking-tight text-6xl">iCBIG</span>
       </header>
