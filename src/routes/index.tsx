@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import videoAsset from "@/assets/ICBIG_Main_Placeholder_720.mov.asset.json";
+import videoAsset from "@/assets/ICBIRG_Placeholder.mov.asset.json";
 
 export const Route = createFileRoute("/")({
   component: Splash,
