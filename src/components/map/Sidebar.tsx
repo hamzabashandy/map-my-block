@@ -39,6 +39,7 @@ export function SidebarContent({
   onToggleCategory,
   selectedId,
   onSelect,
+  adjacency,
   tab,
   onTabChange,
   dragHandlers,
@@ -50,6 +51,14 @@ export function SidebarContent({
   const selected = selectedId
     ? businesses.find((b) => b.id === selectedId) ?? null
     : null;
+  const neighbours = useMemo(() => {
+    if (!selected) return [];
+    const ids = adjacency?.[selected.id] ?? [];
+    return ids
+      .map((id) => businesses.find((b) => b.id === id))
+      .filter((b): b is Business => Boolean(b));
+  }, [selected, adjacency, businesses]);
+
 
   const stopDrag = (e: React.SyntheticEvent) => e.stopPropagation();
 
