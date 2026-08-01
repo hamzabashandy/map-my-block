@@ -22,6 +22,15 @@ function n(v: unknown): number | undefined {
   return Number.isFinite(num) ? num : undefined;
 }
 
+function ids(v: unknown): string[] {
+  const raw = s(v);
+  if (!raw) return [];
+  return raw
+    .split(/[;,]/)
+    .map((x) => x.trim())
+    .filter(Boolean);
+}
+
 function slugify(value: string): string {
   return (
     value
@@ -68,7 +77,33 @@ function mapRow(row: RawRow): Business | null {
     description_short: s(row.description_short) ?? "",
     description_long: s(row.description_long) ?? "",
     photo_url: s(row.photo_url),
+    connection_ids: ids(row.connection_ids),
   };
+}
+
+/**
+ * Undirected adjacency map. A connection is recorded on only one of the two
+ * rows, so neighbours of X = X's own connection_ids + everyone listing X.
+ * Ids that don't resolve to a loaded entry are dropped.
+ */
+export function buildAdjacency(items: Business[]): Record<string, string[]> {
+  const known = new Set(items.map((i) => i.id));
+  const acc = new Map<string, Set<string>>();
+  const link = (a: string, b: string) => {
+    if (a === b || !known.has(a) || !known.has(b)) return;
+    if (!acc.has(a)) acc.set(a, new Set());
+    if (!acc.has(b)) acc.set(b, new Set());
+    acc.get(a)!.add(b);
+    acc.get(b)!.add(a);
+  };
+  for (const item of items) {
+    for (const other of item.connection_ids ?? []) link(item.id, other);
+  }
+  const out: Record<string, string[]> = {};
+  acc.forEach((set, id) => {
+    out[id] = Array.from(set);
+  });
+  return out;
 }
 
 export async function fetchBusinesses(): Promise<Business[]> {
