@@ -264,10 +264,25 @@ export function MapCanvas({
       }
     }
 
+    const selId = selectedRef.current;
+    const selected = selId
+      ? businessesRef.current.find((x) => x.id === selId)
+      : undefined;
+    const accent = selected ? CATEGORIES[selected.category].color : null;
+
     for (const { entry } of entries) {
-      const isSelected = selectedRef.current === entry.business.id;
-      const localT = morphOk.has(entry.business.id) ? t : 0;
-      paintMarker(entry, localT, isSelected);
+      const id = entry.business.id;
+      const isSelected = selId === id;
+      const isNeighbour = !isSelected && neighboursRef.current.has(id);
+      const state: MarkerState = !selId
+        ? "normal"
+        : isSelected
+          ? "selected"
+          : isNeighbour
+            ? "neighbour"
+            : "dim";
+      const localT = morphOk.has(id) ? t : 0;
+      paintMarker(entry, localT, state, accent);
     }
   }
 
