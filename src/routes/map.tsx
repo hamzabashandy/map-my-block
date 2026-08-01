@@ -72,6 +72,7 @@ function MapPage() {
       <MapCanvas
         businesses={items}
         selectedId={selectedId}
+        neighbourIds={neighbourIds}
         onSelect={(id) => handleSelect(id)}
         isDesktop={isDesktop}
       />
