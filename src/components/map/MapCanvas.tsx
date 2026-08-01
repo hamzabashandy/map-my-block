@@ -186,19 +186,39 @@ export function MapCanvas({
     updateMarkers();
   }, [businesses]);
 
-  // Re-render on selection change
+  // Re-render on selection / neighbourhood change
   useEffect(() => {
     updateMarkers();
-  }, [selectedId]);
+  }, [selectedId, neighbourKey]);
 
-  // Pan to selected
+  // Pan to selected (or frame its mapped neighbours when it has no location)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !selectedId) return;
     const b = businessesRef.current.find((x) => x.id === selectedId);
-    if (!b || !b.mapped || b.lng === undefined || b.lat === undefined) return;
-    map.easeTo({ center: [b.lng, b.lat], duration: 600 });
-  }, [selectedId]);
+    if (!b) return;
+
+    if (b.mapped && b.lng !== undefined && b.lat !== undefined) {
+      map.easeTo({ center: [b.lng, b.lat], duration: 600 });
+      return;
+    }
+
+    const neighbours = businessesRef.current.filter(
+      (x) =>
+        neighboursRef.current.has(x.id) &&
+        x.mapped &&
+        x.lng !== undefined &&
+        x.lat !== undefined,
+    );
+    if (neighbours.length === 0) return;
+    const bounds = new mapboxgl.LngLatBounds();
+    for (const nb of neighbours) bounds.extend([nb.lng!, nb.lat!]);
+    map.fitBounds(bounds, {
+      padding: 120,
+      maxZoom: 17,
+      duration: 800,
+    });
+  }, [selectedId, neighbourKey]);
 
   function updateMarkers() {
     const map = mapRef.current;
