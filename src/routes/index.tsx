@@ -121,14 +121,14 @@ function Splash() {
               ·
             </span>
             <a
-              href="mailto:hello@icbig.ca"
+              href="mailto:hello@betweenthebridges.ca"
               className="transition-colors hover:text-foreground"
             >
-              hello@icbig.ca
+              hello@betweenthebridges.ca
             </a>
           </div>
           <a
-            href="mailto:hello@icbig.ca"
+            href="mailto:hello@betweenthebridges.ca"
             className="transition-colors hover:text-foreground"
           >
             Get in touch →
