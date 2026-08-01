@@ -18,7 +18,9 @@ export function DetailPanel({
 }) {
   const cat = CATEGORIES[business.category];
   const Icon = cat.icon;
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${business.lat},${business.lng}`;
+  const directionsUrl = business.mapped
+    ? `https://www.google.com/maps/dir/?api=1&destination=${business.lat},${business.lng}`
+    : null;
 
   return (
     <div className="flex h-full flex-col">
@@ -92,6 +94,7 @@ export function DetailPanel({
         </div>
       </div>
 
+      {directionsUrl && (
       <div className="border-t border-white/[0.06] p-3">
         <a
           href={directionsUrl}
@@ -103,6 +106,7 @@ export function DetailPanel({
           Get directions
         </a>
       </div>
+      )}
     </div>
   );
 }
