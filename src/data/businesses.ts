@@ -116,22 +116,6 @@ export const BUSINESSES: Business[] = [
       "A two-table espresso bar across from the canal. Beans roasted in Hintonburg, sourdough from the bakery next door.",
   },
   {
-    id: "sunnyside-yoga",
-    name: "Sunnyside Yoga",
-    category: "wellness",
-    lat: 45.3938,
-    lng: -75.6889,
-    address: "76 Sunnyside Ave, Ottawa, ON",
-    phone: "(613) 555-0123",
-    website: "https://sunnysideyoga.example",
-    hours: "Mon–Sun · 6am–9pm",
-    status: "closing-soon",
-    walking_minutes: 5,
-    description_short: "Yoga & breathwork",
-    description_long:
-      "A neighbourhood studio with drop-ins, prenatal classes, and a sliding scale every Sunday morning. Mats provided.",
-  },
-  {
     id: "oos-hardware",
     name: "Old Ottawa South Hardware",
     category: "shops",
