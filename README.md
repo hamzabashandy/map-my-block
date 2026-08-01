@@ -14,7 +14,7 @@ One paragraph in the center. Use this exact copy:
 
 
 One large primary button below the paragraph: "Open the map →" that routes to /map.
-A discrete footer with: a phone number placeholder (e.g. (613) 555-0100), an email placeholder (e.g. hello@icbig.ca), and a small "Get in touch" link that opens the email in mailto:.
+A discrete footer with: a phone number placeholder (e.g. (613) 555-0100), an email placeholder (e.g. hello@betweenthebridges.ca), and a small "Get in touch" link that opens the email in mailto:.
 The background should be the same dark color as the map page so the transition feels seamless.
 
 Route 2: /map — the directory itself
