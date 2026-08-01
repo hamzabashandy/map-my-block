@@ -145,6 +145,8 @@ export function SidebarContent({
             detail: selected ? (
               <DetailPanel
                 business={selected}
+                neighbours={neighbours}
+                onSelect={(id) => onSelect(id)}
                 onBack={() => onSelect(null)}
               />
             ) : null,
