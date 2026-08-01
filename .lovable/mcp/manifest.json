@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "local-connect-map",
+      "version": "0.1.0",
+      "title": "Local Connect Map"
+    },
+    "tools": [
+      {
+        "name": "list_businesses",
+        "title": "List neighbourhood businesses",
+        "description": "List the businesses, makers, and community spaces in the iCBIG neighbourhood directory. Optionally filter by category or by maximum walking time.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "category": {
+              "description": "Only return listings in this category.",
+              "type": "string",
+              "enum": [
+                "food",
+                "wellness",
+                "arts",
+                "shops",
+                "community"
+              ]
+            },
+            "max_walking_minutes": {
+              "description": "Only return listings within this many minutes of walking.",
+              "type": "number"
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_businesses",
+        "title": "Search the directory",
+        "description": "Free-text search across neighbourhood directory listings by name, description, category, or address.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Search text, e.g. 'coffee' or 'yoga'."
+            }
+          },
+          "required": [
+            "query"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_business",
+        "title": "Get a business",
+        "description": "Get full details for one directory listing by its id or exact name, including hours, contact info, coordinates, and the long description.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "id_or_name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The listing id or its exact name."
+            }
+          },
+          "required": [
+            "id_or_name"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_categories",
+        "title": "List categories",
+        "description": "List the directory categories and how many listings each currently contains.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
