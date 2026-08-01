@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { BottomSheet } from "../components/map/BottomSheet";
 import { MapCanvas } from "../components/map/MapCanvas";
 import { SidebarContent, type Tab } from "../components/map/Sidebar";
 import type { CategoryId } from "../data/businesses";
 import { useMediaQuery } from "../hooks/useMediaQuery";
-import { useBusinesses } from "../lib/data";
+import { buildAdjacency, useBusinesses } from "../lib/data";
 
 export const Route = createFileRoute("/map")({
   component: MapPage,
