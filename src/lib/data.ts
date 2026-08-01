@@ -22,29 +22,42 @@ function n(v: unknown): number | undefined {
   return Number.isFinite(num) ? num : undefined;
 }
 
+function slugify(value: string): string {
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "listing"
+  );
+}
+
 function mapRow(row: RawRow): Business | null {
   const status = s(row.status)?.toLowerCase() ?? "open";
   if (status === "inactive") return null;
+  if (s(row.publish)?.toLowerCase() === "no") return null;
   const lat = n(row.lat);
   const lng = n(row.lng);
-  if (lat === undefined || lng === undefined) return null;
+  const mapped = lat !== undefined && lng !== undefined;
 
-  const rawCat = (s(row.category) ?? "community").toLowerCase();
+  const rawCat = (s(row.category) ?? "business").toLowerCase();
   const category = (Object.keys(CATEGORIES) as CategoryId[]).includes(
     rawCat as CategoryId,
   )
     ? (rawCat as CategoryId)
-    : "community";
+    : "business";
 
   const normalizedStatus: Business["status"] =
     status === "closing-soon" || status === "closed" ? status : "open";
 
+  const name = s(row.name) ?? "Untitled";
+
   return {
-    id: s(row.id) ?? `${lat},${lng}`,
-    name: s(row.name) ?? "Untitled",
+    id: s(row.id) ?? slugify(name),
+    name,
     category,
     lat,
     lng,
+    mapped,
     address: s(row.address) ?? "",
     phone: s(row.phone),
     email: s(row.email),
