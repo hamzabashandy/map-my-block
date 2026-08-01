@@ -22,6 +22,7 @@ type Props = {
   onToggleCategory: (id: CategoryId) => void;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  adjacency?: Record<string, string[]>;
   tab: Tab;
   onTabChange: (t: Tab) => void;
   dragHandlers?: SheetDragHandlers;
@@ -38,6 +39,7 @@ export function SidebarContent({
   onToggleCategory,
   selectedId,
   onSelect,
+  adjacency,
   tab,
   onTabChange,
   dragHandlers,
@@ -49,6 +51,14 @@ export function SidebarContent({
   const selected = selectedId
     ? businesses.find((b) => b.id === selectedId) ?? null
     : null;
+  const neighbours = useMemo(() => {
+    if (!selected) return [];
+    const ids = adjacency?.[selected.id] ?? [];
+    return ids
+      .map((id) => businesses.find((b) => b.id === id))
+      .filter((b): b is Business => Boolean(b));
+  }, [selected, adjacency, businesses]);
+
 
   const stopDrag = (e: React.SyntheticEvent) => e.stopPropagation();
 
@@ -135,6 +145,8 @@ export function SidebarContent({
             detail: selected ? (
               <DetailPanel
                 business={selected}
+                neighbours={neighbours}
+                onSelect={(id) => onSelect(id)}
                 onBack={() => onSelect(null)}
               />
             ) : null,

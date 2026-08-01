@@ -32,6 +32,8 @@ export type Business = {
   description_short: string;
   description_long: string;
   photo_url?: string;
+  /** ids of other entries this one is connected to (as recorded on this row) */
+  connection_ids?: string[];
 };
 
 export type CategoryMeta = {

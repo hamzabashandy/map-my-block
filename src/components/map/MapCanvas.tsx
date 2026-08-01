@@ -15,6 +15,7 @@ const STATUS_DOT: Record<Business["status"], string> = {
 type Props = {
   businesses: Business[];
   selectedId: string | null;
+  neighbourIds?: string[];
   onSelect: (id: string) => void;
   isDesktop: boolean;
 };
@@ -30,6 +31,7 @@ type MarkerEntry = {
 export function MapCanvas({
   businesses,
   selectedId,
+  neighbourIds,
   onSelect,
   isDesktop,
 }: Props) {
@@ -38,10 +40,13 @@ export function MapCanvas({
   const markersRef = useRef<Map<string, MarkerEntry>>(new Map());
   const businessesRef = useRef(businesses);
   const selectedRef = useRef(selectedId);
+  const neighboursRef = useRef<Set<string>>(new Set(neighbourIds ?? []));
   const onSelectRef = useRef(onSelect);
   businessesRef.current = businesses;
   selectedRef.current = selectedId;
+  neighboursRef.current = new Set(neighbourIds ?? []);
   onSelectRef.current = onSelect;
+  const neighbourKey = (neighbourIds ?? []).join(",");
 
   const [token, setToken] = useState<string | null>(null);
   const [visibleError, setVisibleError] = useState<string | null>(null);
@@ -181,19 +186,39 @@ export function MapCanvas({
     updateMarkers();
   }, [businesses]);
 
-  // Re-render on selection change
+  // Re-render on selection / neighbourhood change
   useEffect(() => {
     updateMarkers();
-  }, [selectedId]);
+  }, [selectedId, neighbourKey]);
 
-  // Pan to selected
+  // Pan to selected (or frame its mapped neighbours when it has no location)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !selectedId) return;
     const b = businessesRef.current.find((x) => x.id === selectedId);
-    if (!b || !b.mapped || b.lng === undefined || b.lat === undefined) return;
-    map.easeTo({ center: [b.lng, b.lat], duration: 600 });
-  }, [selectedId]);
+    if (!b) return;
+
+    if (b.mapped && b.lng !== undefined && b.lat !== undefined) {
+      map.easeTo({ center: [b.lng, b.lat], duration: 600 });
+      return;
+    }
+
+    const neighbours = businessesRef.current.filter(
+      (x) =>
+        neighboursRef.current.has(x.id) &&
+        x.mapped &&
+        x.lng !== undefined &&
+        x.lat !== undefined,
+    );
+    if (neighbours.length === 0) return;
+    const bounds = new mapboxgl.LngLatBounds();
+    for (const nb of neighbours) bounds.extend([nb.lng!, nb.lat!]);
+    map.fitBounds(bounds, {
+      padding: 120,
+      maxZoom: 17,
+      duration: 800,
+    });
+  }, [selectedId, neighbourKey]);
 
   function updateMarkers() {
     const map = mapRef.current;
@@ -239,10 +264,25 @@ export function MapCanvas({
       }
     }
 
+    const selId = selectedRef.current;
+    const selected = selId
+      ? businessesRef.current.find((x) => x.id === selId)
+      : undefined;
+    const accent = selected ? CATEGORIES[selected.category].color : null;
+
     for (const { entry } of entries) {
-      const isSelected = selectedRef.current === entry.business.id;
-      const localT = morphOk.has(entry.business.id) ? t : 0;
-      paintMarker(entry, localT, isSelected);
+      const id = entry.business.id;
+      const isSelected = selId === id;
+      const isNeighbour = !isSelected && neighboursRef.current.has(id);
+      const state: MarkerState = !selId
+        ? "normal"
+        : isSelected
+          ? "selected"
+          : isNeighbour
+            ? "neighbour"
+            : "dim";
+      const localT = morphOk.has(id) ? t : 0;
+      paintMarker(entry, localT, state, accent);
     }
   }
 
@@ -269,13 +309,34 @@ export function MapCanvas({
   );
 }
 
-function paintMarker(entry: MarkerEntry, t: number, selected: boolean) {
+type MarkerState = "normal" | "selected" | "neighbour" | "dim";
+
+function paintMarker(
+  entry: MarkerEntry,
+  t: number,
+  state: MarkerState,
+  accent: string | null,
+) {
   const cat = CATEGORIES[entry.business.category];
+  const selected = state === "selected";
   const w = 32 + (210 - 32) * t;
   const h = 32 + (60 - 32) * t;
   const radius = 16 + (12 - 16) * t;
   const textOpacity = Math.max(0, Math.min(1, (t - 0.5) * 2));
   const scale = selected ? 1.06 : 1;
+  const ring = accent ?? cat.color;
+
+  const border = selected
+    ? `1.5px solid ${cat.color}`
+    : state === "neighbour"
+      ? `1.5px solid ${ring}`
+      : `1.5px solid ${cat.color}AA`;
+
+  const shadow = selected
+    ? `0 0 0 6px ${cat.color}33, 0 8px 24px rgba(0,0,0,0.55)`
+    : state === "neighbour"
+      ? `0 0 0 3px ${ring}2E, 0 4px 14px rgba(0,0,0,0.45)`
+      : "0 4px 14px rgba(0,0,0,0.45)";
 
   const el = entry.inner;
   el.style.cssText = `
@@ -287,21 +348,18 @@ function paintMarker(entry: MarkerEntry, t: number, selected: boolean) {
     margin-top: ${-h / 2}px;
     border-radius: ${radius}px;
     background: ${t > 0.5 ? "rgba(20,20,22,0.94)" : darken(cat.color)};
-    border: 1.5px solid ${selected ? cat.color : cat.color + "AA"};
-    box-shadow: ${
-      selected
-        ? `0 0 0 6px ${cat.color}33, 0 8px 24px rgba(0,0,0,0.55)`
-        : "0 4px 14px rgba(0,0,0,0.45)"
-    };
+    border: ${border};
+    box-shadow: ${shadow};
     transform: scale(${scale});
-    transition: all 200ms ease, background 300ms ease;
+    opacity: ${state === "dim" ? 0.25 : 1};
+    transition: all 200ms ease, background 300ms ease, opacity 200ms ease;
     cursor: pointer;
     display: flex;
     align-items: center;
     overflow: hidden;
     backdrop-filter: blur(6px);
     color: white;
-    z-index: ${selected ? 20 : 1};
+    z-index: ${selected ? 20 : state === "neighbour" ? 10 : 1};
   `;
 
   entry.root.render(

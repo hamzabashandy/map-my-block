@@ -11,9 +11,13 @@ import { StatusPill } from "./StatusPill";
 
 export function DetailPanel({
   business,
+  neighbours = [],
+  onSelect,
   onBack,
 }: {
   business: Business;
+  neighbours?: Business[];
+  onSelect?: (id: string) => void;
   onBack: () => void;
 }) {
   const cat = CATEGORIES[business.category];
@@ -92,7 +96,45 @@ export function DetailPanel({
             {business.description_long}
           </p>
         </div>
+
+        {neighbours.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              Connected to
+            </h3>
+            <ul className="mt-2 space-y-1">
+              {neighbours.map((nb) => {
+                const nbCat = CATEGORIES[nb.category];
+                return (
+                  <li key={nb.id}>
+                    <button
+                      type="button"
+                      onClick={() => onSelect?.(nb.id)}
+                      className="flex w-full items-start gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-white/[0.05]"
+                    >
+                      <span
+                        className="mt-[6px] h-2 w-2 shrink-0 rounded-full"
+                        style={{ backgroundColor: nbCat.color }}
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[13.5px] text-foreground">
+                          {nb.name}
+                        </span>
+                        {nb.description_short && (
+                          <span className="block truncate text-[12px] text-muted-foreground">
+                            {nb.description_short}
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
       </div>
+
 
       {directionsUrl && (
       <div className="border-t border-white/[0.06] p-3">

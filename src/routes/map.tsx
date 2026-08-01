@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { BottomSheet } from "../components/map/BottomSheet";
 import { MapCanvas } from "../components/map/MapCanvas";
 import { SidebarContent, type Tab } from "../components/map/Sidebar";
 import type { CategoryId } from "../data/businesses";
 import { useMediaQuery } from "../hooks/useMediaQuery";
-import { useBusinesses } from "../lib/data";
+import { buildAdjacency, useBusinesses } from "../lib/data";
 
 export const Route = createFileRoute("/map")({
   component: MapPage,
@@ -31,6 +31,8 @@ function MapPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("places");
   const [snap, setSnap] = useState<0 | 1 | 2>(1);
+  const adjacency = useMemo(() => buildAdjacency(items), [items]);
+  const neighbourIds = selectedId ? adjacency[selectedId] ?? [] : [];
 
   const toggleCategory = (id: CategoryId) => {
     setActiveCategories((prev) => {
@@ -58,6 +60,7 @@ function MapPage() {
       onToggleCategory={toggleCategory}
       selectedId={selectedId}
       onSelect={handleSelect}
+      adjacency={adjacency}
       tab={tab}
       onTabChange={setTab}
       dragHandlers={dragHandlers}
@@ -69,6 +72,7 @@ function MapPage() {
       <MapCanvas
         businesses={items}
         selectedId={selectedId}
+        neighbourIds={neighbourIds}
         onSelect={(id) => handleSelect(id)}
         isDesktop={isDesktop}
       />
