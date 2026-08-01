@@ -27,7 +27,9 @@ export function BusinessCard({
           {business.name}
         </span>
         <span className="block truncate text-[12.5px] text-muted-foreground">
-          {business.description_short} · {business.walking_minutes} min walk
+          {business.mapped
+            ? `${business.description_short} · ${business.walking_minutes} min walk`
+            : business.description_short}
         </span>
       </span>
       <StatusPill status={business.status} />

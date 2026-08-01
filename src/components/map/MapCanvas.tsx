@@ -129,7 +129,10 @@ export function MapCanvas({
     const map = mapRef.current;
     if (!map) return;
     const current = markersRef.current;
-    const nextIds = new Set(businesses.map((b) => b.id));
+    const mappedBusinesses = businesses.filter(
+      (b): b is Business & { lat: number; lng: number } => b.mapped,
+    );
+    const nextIds = new Set(mappedBusinesses.map((b) => b.id));
 
     current.forEach((entry, id) => {
       if (!nextIds.has(id)) {
@@ -140,7 +143,7 @@ export function MapCanvas({
       }
     });
 
-    for (const b of businesses) {
+    for (const b of mappedBusinesses) {
       const existing = current.get(b.id);
       if (existing) {
         existing.business = b;
@@ -188,7 +191,7 @@ export function MapCanvas({
     const map = mapRef.current;
     if (!map || !selectedId) return;
     const b = businessesRef.current.find((x) => x.id === selectedId);
-    if (!b) return;
+    if (!b || !b.mapped || b.lng === undefined || b.lat === undefined) return;
     map.easeTo({ center: [b.lng, b.lat], duration: 600 });
   }, [selectedId]);
 
@@ -200,7 +203,7 @@ export function MapCanvas({
     const centerPx = map.project(map.getCenter());
 
     const entries = Array.from(markersRef.current.values()).map((e) => {
-      const pt = map.project([e.business.lng, e.business.lat]);
+      const pt = map.project([e.business.lng ?? 0, e.business.lat ?? 0]);
       return {
         entry: e,
         d: Math.hypot(pt.x - centerPx.x, pt.y - centerPx.y),
