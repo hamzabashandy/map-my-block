@@ -9,7 +9,13 @@ export default defineTool({
     "List the businesses, makers, and community spaces in the iCBIG neighbourhood directory. Optionally filter by category or by maximum walking time.",
   inputSchema: {
     category: z
-      .enum(["food", "wellness", "arts", "shops", "community"])
+      .enum([
+        "business",
+        "community_group",
+        "institution",
+        "project",
+        "services_facilitator",
+      ])
       .optional()
       .describe("Only return listings in this category."),
     max_walking_minutes: z

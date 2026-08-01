@@ -29,11 +29,11 @@
               "description": "Only return listings in this category.",
               "type": "string",
               "enum": [
-                "food",
-                "wellness",
-                "arts",
-                "shops",
-                "community"
+                "business",
+                "community_group",
+                "institution",
+                "project",
+                "services_facilitator"
               ]
             },
             "max_walking_minutes": {
