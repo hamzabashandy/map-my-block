@@ -15,6 +15,7 @@ const STATUS_DOT: Record<Business["status"], string> = {
 type Props = {
   businesses: Business[];
   selectedId: string | null;
+  neighbourIds?: string[];
   onSelect: (id: string) => void;
   isDesktop: boolean;
 };
@@ -30,6 +31,7 @@ type MarkerEntry = {
 export function MapCanvas({
   businesses,
   selectedId,
+  neighbourIds,
   onSelect,
   isDesktop,
 }: Props) {
@@ -38,10 +40,13 @@ export function MapCanvas({
   const markersRef = useRef<Map<string, MarkerEntry>>(new Map());
   const businessesRef = useRef(businesses);
   const selectedRef = useRef(selectedId);
+  const neighboursRef = useRef<Set<string>>(new Set(neighbourIds ?? []));
   const onSelectRef = useRef(onSelect);
   businessesRef.current = businesses;
   selectedRef.current = selectedId;
+  neighboursRef.current = new Set(neighbourIds ?? []);
   onSelectRef.current = onSelect;
+  const neighbourKey = (neighbourIds ?? []).join(",");
 
   const [token, setToken] = useState<string | null>(null);
   const [visibleError, setVisibleError] = useState<string | null>(null);
