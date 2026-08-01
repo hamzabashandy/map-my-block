@@ -11,9 +11,13 @@ import { StatusPill } from "./StatusPill";
 
 export function DetailPanel({
   business,
+  neighbours = [],
+  onSelect,
   onBack,
 }: {
   business: Business;
+  neighbours?: Business[];
+  onSelect?: (id: string) => void;
   onBack: () => void;
 }) {
   const cat = CATEGORIES[business.category];
