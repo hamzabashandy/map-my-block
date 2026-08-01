@@ -22,6 +22,7 @@ type Props = {
   onToggleCategory: (id: CategoryId) => void;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  adjacency?: Record<string, string[]>;
   tab: Tab;
   onTabChange: (t: Tab) => void;
   dragHandlers?: SheetDragHandlers;
