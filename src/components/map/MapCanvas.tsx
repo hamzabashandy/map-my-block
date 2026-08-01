@@ -309,13 +309,34 @@ export function MapCanvas({
   );
 }
 
-function paintMarker(entry: MarkerEntry, t: number, selected: boolean) {
+type MarkerState = "normal" | "selected" | "neighbour" | "dim";
+
+function paintMarker(
+  entry: MarkerEntry,
+  t: number,
+  state: MarkerState,
+  accent: string | null,
+) {
   const cat = CATEGORIES[entry.business.category];
+  const selected = state === "selected";
   const w = 32 + (210 - 32) * t;
   const h = 32 + (60 - 32) * t;
   const radius = 16 + (12 - 16) * t;
   const textOpacity = Math.max(0, Math.min(1, (t - 0.5) * 2));
   const scale = selected ? 1.06 : 1;
+  const ring = accent ?? cat.color;
+
+  const border = selected
+    ? `1.5px solid ${cat.color}`
+    : state === "neighbour"
+      ? `1.5px solid ${ring}`
+      : `1.5px solid ${cat.color}AA`;
+
+  const shadow = selected
+    ? `0 0 0 6px ${cat.color}33, 0 8px 24px rgba(0,0,0,0.55)`
+    : state === "neighbour"
+      ? `0 0 0 3px ${ring}2E, 0 4px 14px rgba(0,0,0,0.45)`
+      : "0 4px 14px rgba(0,0,0,0.45)";
 
   const el = entry.inner;
   el.style.cssText = `
@@ -327,21 +348,18 @@ function paintMarker(entry: MarkerEntry, t: number, selected: boolean) {
     margin-top: ${-h / 2}px;
     border-radius: ${radius}px;
     background: ${t > 0.5 ? "rgba(20,20,22,0.94)" : darken(cat.color)};
-    border: 1.5px solid ${selected ? cat.color : cat.color + "AA"};
-    box-shadow: ${
-      selected
-        ? `0 0 0 6px ${cat.color}33, 0 8px 24px rgba(0,0,0,0.55)`
-        : "0 4px 14px rgba(0,0,0,0.45)"
-    };
+    border: ${border};
+    box-shadow: ${shadow};
     transform: scale(${scale});
-    transition: all 200ms ease, background 300ms ease;
+    opacity: ${state === "dim" ? 0.25 : 1};
+    transition: all 200ms ease, background 300ms ease, opacity 200ms ease;
     cursor: pointer;
     display: flex;
     align-items: center;
     overflow: hidden;
     backdrop-filter: blur(6px);
     color: white;
-    z-index: ${selected ? 20 : 1};
+    z-index: ${selected ? 20 : state === "neighbour" ? 10 : 1};
   `;
 
   entry.root.render(
