@@ -31,6 +31,8 @@ function MapPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("places");
   const [snap, setSnap] = useState<0 | 1 | 2>(1);
+  const adjacency = useMemo(() => buildAdjacency(items), [items]);
+  const neighbourIds = selectedId ? adjacency[selectedId] ?? [] : [];
 
   const toggleCategory = (id: CategoryId) => {
     setActiveCategories((prev) => {
@@ -58,6 +60,7 @@ function MapPage() {
       onToggleCategory={toggleCategory}
       selectedId={selectedId}
       onSelect={handleSelect}
+      adjacency={adjacency}
       tab={tab}
       onTabChange={setTab}
       dragHandlers={dragHandlers}
