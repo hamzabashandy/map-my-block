@@ -1,18 +1,23 @@
 import { Map as MapIcon, RefreshCw } from "lucide-react";
-import { useMemo } from "react";
 import { type Business, type CategoryId } from "../../data/businesses";
-import { AboutTab } from "./AboutTab";
 import type { SheetDragHandlers } from "./BottomSheet";
 import { BusinessList } from "./BusinessList";
 import { CategoryPills } from "./CategoryPills";
-import { ContactTab } from "./ContactTab";
 import { DetailPanel } from "./DetailPanel";
 import { SearchBar } from "./SearchBar";
 
-export type Tab = "places" | "about" | "contact";
+export type Tab = "directory" | "projects" | "services";
+
+export const DIRECTORY_CATEGORIES: CategoryId[] = [
+  "business",
+  "community_group",
+  "institution",
+];
 
 type Props = {
   businesses: Business[];
+  filtered: Business[];
+  emptyMessage: string;
   loading: boolean;
   error: string | null;
   onRefresh: () => void;
@@ -30,6 +35,8 @@ type Props = {
 
 export function SidebarContent({
   businesses,
+  filtered,
+  emptyMessage,
   loading,
   error,
   onRefresh,
@@ -44,21 +51,16 @@ export function SidebarContent({
   onTabChange,
   dragHandlers,
 }: Props) {
-  const filtered = useMemo(
-    () => filterBusinesses(businesses, query, activeCategories),
-    [businesses, query, activeCategories],
-  );
   const selected = selectedId
     ? businesses.find((b) => b.id === selectedId) ?? null
     : null;
-  const neighbours = useMemo(() => {
-    if (!selected) return [];
+  const neighbours = (() => {
+    if (!selected) return [] as Business[];
     const ids = adjacency?.[selected.id] ?? [];
     return ids
       .map((id) => businesses.find((b) => b.id === id))
       .filter((b): b is Business => Boolean(b));
-  }, [selected, adjacency, businesses]);
-
+  })();
 
   const stopDrag = (e: React.SyntheticEvent) => e.stopPropagation();
 
@@ -103,7 +105,13 @@ export function SidebarContent({
           >
             <SearchBar value={query} onChange={onQueryChange} />
           </div>
-          <CategoryPills active={activeCategories} onToggle={onToggleCategory} />
+          {tab === "directory" && (
+            <CategoryPills
+              active={activeCategories}
+              onToggle={onToggleCategory}
+              categories={DIRECTORY_CATEGORIES}
+            />
+          )}
         </div>
       )}
 
@@ -113,33 +121,29 @@ export function SidebarContent({
           {{
             list: (
               <div className="h-full overflow-y-auto pb-2">
-                {tab === "places" && (
-                  <>
-                    {error ? (
-                      <div className="px-4 py-8 text-center text-[13px] text-muted-foreground">
-                        <p>Couldn't load the directory.</p>
-                        <p className="mt-1 text-[12px] text-white/30">
-                          {error}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={onRefresh}
-                          className="mt-3 rounded-full bg-white/[0.06] px-3 py-1.5 text-[12px] text-foreground hover:bg-white/[0.1]"
-                        >
-                          Try again
-                        </button>
-                      </div>
-                    ) : loading && businesses.length === 0 ? (
-                      <div className="px-4 py-10 text-center text-[13px] text-muted-foreground">
-                        Loading neighbourhood…
-                      </div>
-                    ) : (
-                      <BusinessList items={filtered} onSelect={onSelect} />
-                    )}
-                  </>
+                {error ? (
+                  <div className="px-4 py-8 text-center text-[13px] text-muted-foreground">
+                    <p>Couldn't load the directory.</p>
+                    <p className="mt-1 text-[12px] text-white/30">{error}</p>
+                    <button
+                      type="button"
+                      onClick={onRefresh}
+                      className="mt-3 rounded-full bg-white/[0.06] px-3 py-1.5 text-[12px] text-foreground hover:bg-white/[0.1]"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                ) : loading && businesses.length === 0 ? (
+                  <div className="px-4 py-10 text-center text-[13px] text-muted-foreground">
+                    Loading neighbourhood…
+                  </div>
+                ) : (
+                  <BusinessList
+                    items={filtered}
+                    onSelect={onSelect}
+                    emptyMessage={emptyMessage}
+                  />
                 )}
-                {tab === "about" && <AboutTab />}
-                {tab === "contact" && <ContactTab />}
               </div>
             ),
             detail: selected ? (
@@ -160,9 +164,9 @@ export function SidebarContent({
           <div className="flex items-center gap-1">
             {(
               [
-                { id: "places", label: "Places" },
-                { id: "about", label: "About" },
-                { id: "contact", label: "Contact" },
+                { id: "directory", label: "Directory" },
+                { id: "projects", label: "Projects" },
+                { id: "services", label: "Services" },
               ] as { id: Tab; label: string }[]
             ).map((t) => {
               const active = tab === t.id;
@@ -223,21 +227,4 @@ function PanelSwap({
       </div>
     </div>
   );
-}
-
-function filterBusinesses(
-  items: Business[],
-  query: string,
-  active: Set<CategoryId>,
-): Business[] {
-  const q = query.trim().toLowerCase();
-  return items.filter((b) => {
-    if (active.size > 0 && !active.has(b.category)) return false;
-    if (!q) return true;
-    return (
-      b.name.toLowerCase().includes(q) ||
-      b.description_short.toLowerCase().includes(q) ||
-      b.description_long.toLowerCase().includes(q)
-    );
-  });
 }
