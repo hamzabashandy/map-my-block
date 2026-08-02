@@ -21,6 +21,12 @@ export const Route = createFileRoute("/map")({
   }),
 });
 
+const EMPTY_MESSAGES: Record<Tab, string> = {
+  directory: "No places match your search.",
+  projects: "No projects yet.",
+  services: "No services listed yet.",
+};
+
 function MapPage() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { items, loading, error, refresh } = useBusinesses();
@@ -29,10 +35,31 @@ function MapPage() {
     () => new Set(),
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>("places");
+  const [tab, setTab] = useState<Tab>("directory");
   const [snap, setSnap] = useState<0 | 1 | 2>(1);
   const adjacency = useMemo(() => buildAdjacency(items), [items]);
   const neighbourIds = selectedId ? adjacency[selectedId] ?? [] : [];
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return items.filter((b) => {
+      if (tab === "projects") {
+        if (b.category !== "project") return false;
+      } else if (tab === "services") {
+        if (b.category !== "services_facilitator") return false;
+      } else {
+        if (!DIRECTORY_CATEGORIES.includes(b.category)) return false;
+        if (activeCategories.size > 0 && !activeCategories.has(b.category))
+          return false;
+      }
+      if (!q) return true;
+      return (
+        b.name.toLowerCase().includes(q) ||
+        b.description_short.toLowerCase().includes(q) ||
+        b.description_long.toLowerCase().includes(q)
+      );
+    });
+  }, [items, query, activeCategories, tab]);
 
   const toggleCategory = (id: CategoryId) => {
     setActiveCategories((prev) => {
@@ -43,6 +70,11 @@ function MapPage() {
     });
   };
 
+  const handleTabChange = (t: Tab) => {
+    setTab(t);
+    setActiveCategories(new Set());
+  };
+
   const handleSelect = (id: string | null) => {
     setSelectedId(id);
     if (id && !isDesktop) setSnap(2);
@@ -51,6 +83,8 @@ function MapPage() {
   const renderSidebar = (dragHandlers?: import("../components/map/BottomSheet").SheetDragHandlers) => (
     <SidebarContent
       businesses={items}
+      filtered={filtered}
+      emptyMessage={EMPTY_MESSAGES[tab]}
       loading={loading}
       error={error}
       onRefresh={refresh}
@@ -62,7 +96,7 @@ function MapPage() {
       onSelect={handleSelect}
       adjacency={adjacency}
       tab={tab}
-      onTabChange={setTab}
+      onTabChange={handleTabChange}
       dragHandlers={dragHandlers}
     />
   );
