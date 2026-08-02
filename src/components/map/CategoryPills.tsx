@@ -3,13 +3,18 @@ import { CATEGORY_LIST, type CategoryId } from "../../data/businesses";
 export function CategoryPills({
   active,
   onToggle,
+  categories,
 }: {
   active: Set<CategoryId>;
   onToggle: (id: CategoryId) => void;
+  categories?: CategoryId[];
 }) {
+  const list = categories
+    ? CATEGORY_LIST.filter((c) => categories.includes(c.id))
+    : CATEGORY_LIST;
   return (
     <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1">
-      {CATEGORY_LIST.map((cat) => {
+      {list.map((cat) => {
         const Icon = cat.icon;
         const isActive = active.has(cat.id);
         return (

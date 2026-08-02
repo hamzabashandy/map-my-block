@@ -4,14 +4,16 @@ import { BusinessCard } from "./BusinessCard";
 export function BusinessList({
   items,
   onSelect,
+  emptyMessage = "No places match your search.",
 }: {
   items: Business[];
   onSelect: (id: string) => void;
+  emptyMessage?: string;
 }) {
   if (items.length === 0) {
     return (
       <div className="px-3 py-10 text-center text-sm text-muted-foreground">
-        No places match your search.
+        {emptyMessage}
       </div>
     );
   }
