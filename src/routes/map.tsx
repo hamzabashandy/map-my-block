@@ -117,7 +117,19 @@ function MapPage() {
         neighbourIds={neighbourIds}
         onSelect={(id) => handleSelect(id)}
         isDesktop={isDesktop}
+        onMapReady={setMap}
       />
+
+      <ProjectsPanel
+        map={map}
+        projects={projects}
+        businesses={items}
+        adjacency={adjacency}
+        selectedId={selectedId}
+        onSelect={handleSelect}
+        isWide={isWide}
+      />
+
 
       {isDesktop ? (
         <aside
