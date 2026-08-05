@@ -10,6 +10,9 @@ import { buildAdjacency, useBusinesses } from "../lib/data";
 
 export const Route = createFileRoute("/map")({
   component: MapPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    select: typeof search.select === "string" ? search.select : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Map — iCBIG neighbourhood directory" },
