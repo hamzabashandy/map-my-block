@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type mapboxgl from "mapbox-gl";
 import { useMemo, useState } from "react";
 import { BottomSheet } from "../components/map/BottomSheet";
 import { MapCanvas } from "../components/map/MapCanvas";
+import { ProjectsPanel } from "../components/map/ProjectsPanel";
 import { DIRECTORY_CATEGORIES, SidebarContent, type Tab } from "../components/map/Sidebar";
 import type { CategoryId } from "../data/businesses";
 import { useMediaQuery } from "../hooks/useMediaQuery";
