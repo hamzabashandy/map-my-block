@@ -1,4 +1,4 @@
-import { Map as MapIcon, RefreshCw, X } from "lucide-react";
+import { Map as MapIcon, RefreshCw } from "lucide-react";
 import { type Business, type CategoryId } from "../../data/businesses";
 import type { SheetDragHandlers } from "./BottomSheet";
 import { BusinessList } from "./BusinessList";
