@@ -81,7 +81,11 @@ function MapPage() {
 
   const handleSelect = (id: string | null) => {
     setSelectedId(id);
-    if (id && !isDesktop) setSnap(2);
+    if (!id || isDesktop) return;
+    const picked = items.find((b) => b.id === id);
+    // Projects use the floating panel + connector lines: drop the sheet out of
+    // the way so the lines are visible.
+    setSnap(picked?.category === "project" ? 0 : 2);
   };
 
   const renderSidebar = (dragHandlers?: import("../components/map/BottomSheet").SheetDragHandlers) => (
