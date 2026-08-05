@@ -45,6 +45,8 @@ export function MapCanvas({
   selectedRef.current = selectedId;
   neighboursRef.current = new Set(neighbourIds ?? []);
   onSelectRef.current = onSelect;
+  const onMapReadyRef = useRef(onMapReady);
+  onMapReadyRef.current = onMapReady;
   const neighbourKey = (neighbourIds ?? []).join(",");
 
   const [token, setToken] = useState<string | null>(null);
