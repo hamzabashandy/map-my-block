@@ -15,7 +15,7 @@
       {
         "name": "list_businesses",
         "title": "List neighbourhood businesses",
-        "description": "List the businesses, makers, and community spaces in the iCBIG neighbourhood directory. Optionally filter by category or by maximum walking time.",
+        "description": "List the businesses, makers, and community spaces in the iCBIG neighbourhood directory. Optionally filter by category.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -35,10 +35,6 @@
                 "project",
                 "services_facilitator"
               ]
-            },
-            "max_walking_minutes": {
-              "description": "Only return listings within this many minutes of walking.",
-              "type": "number"
             }
           }
         },

@@ -7,7 +7,9 @@ import {
   Phone,
 } from "lucide-react";
 import { CATEGORIES, type Business } from "../../data/businesses";
+import { formatHours, hasNoHours, useLiveStatus } from "../../lib/hours";
 import { StatusPill } from "./StatusPill";
+
 
 export function DetailPanel({
   business,
@@ -22,9 +24,14 @@ export function DetailPanel({
 }) {
   const cat = CATEGORIES[business.category];
   const Icon = cat.icon;
+  const status = useLiveStatus(business.hours);
+  const hoursText = hasNoHours(business.hours)
+    ? null
+    : formatHours(business.hours);
   const directionsUrl = business.mapped
     ? `https://www.google.com/maps/dir/?api=1&destination=${business.lat},${business.lng}`
     : null;
+
 
   return (
     <div className="flex h-full flex-col">
@@ -52,7 +59,7 @@ export function DetailPanel({
             <Icon className="h-3.5 w-3.5" />
             {cat.label}
           </span>
-          <StatusPill status={business.status} />
+          <StatusPill info={status} />
         </div>
 
         <dl className="mt-5 space-y-2.5 text-[13.5px]">
@@ -85,7 +92,10 @@ export function DetailPanel({
               }
             />
           )}
-          <Row icon={<Clock className="h-4 w-4" />} text={business.hours} />
+          {hoursText && (
+            <Row icon={<Clock className="h-4 w-4" />} text={hoursText} />
+          )}
+
         </dl>
 
         <div className="mt-6">
