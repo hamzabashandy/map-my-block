@@ -92,7 +92,10 @@ export function DetailPanel({
               }
             />
           )}
-          <Row icon={<Clock className="h-4 w-4" />} text={business.hours} />
+          {hoursText && (
+            <Row icon={<Clock className="h-4 w-4" />} text={hoursText} />
+          )}
+
         </dl>
 
         <div className="mt-6">
