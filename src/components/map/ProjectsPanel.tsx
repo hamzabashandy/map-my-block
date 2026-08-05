@@ -1,4 +1,5 @@
 import { Layers, X } from "lucide-react";
+import { useState } from "react";
 import { CATEGORIES, type Business } from "../../data/businesses";
 
 const PROJECT_COLOR = CATEGORIES.project.color;
@@ -18,7 +19,7 @@ export function ProjectsPanel({
   onToggleExpand,
   isDesktop,
 }: Props) {
-  const [open, setOpen] = useStateOpen();
+  const [open, setOpen] = useState(true);
 
   const stopMapEvents = {
     onPointerDown: (e: React.PointerEvent) => e.stopPropagation(),
@@ -136,13 +137,4 @@ export function ProjectsPanel({
       )}
     </div>
   );
-}
-
-function useStateOpen() {
-  return useOpenState();
-}
-
-import { useState } from "react";
-function useOpenState() {
-  return useState(true);
 }
