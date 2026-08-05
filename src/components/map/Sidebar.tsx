@@ -139,7 +139,9 @@ export function SidebarContent({
       <div className="relative flex-1 min-h-0 overflow-hidden">
         <PanelSwap show={selected ? "detail" : "list"}>
           {{
-            list: (
+            list: showServiceForm ? (
+              <ServiceSignupForm onBack={() => setServiceFormOpen(false)} />
+            ) : (
               <div className="thin-scroll h-full overflow-y-auto pb-2">
                 {error ? (
                   <div className="px-4 py-8 text-center text-[13px] text-muted-foreground">
@@ -158,11 +160,27 @@ export function SidebarContent({
                     Loading neighbourhood…
                   </div>
                 ) : (
-                  <BusinessList
-                    items={filtered}
-                    onSelect={onSelect}
-                    emptyMessage={emptyMessage}
-                  />
+                  <>
+                    {tab === "services" && (
+                      <div className="mx-2.5 mb-2 flex items-center gap-2 rounded-xl bg-white/[0.04] px-2.5 py-2.5">
+                        <span className="min-w-0 flex-1 text-[11.5px] leading-snug text-white/55">
+                          Offer a service in the neighbourhood?
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setServiceFormOpen(true)}
+                          className="shrink-0 rounded-full bg-white/[0.1] px-2.5 py-1 text-[11.5px] font-medium text-foreground transition-colors hover:bg-white/[0.18]"
+                        >
+                          Add your service
+                        </button>
+                      </div>
+                    )}
+                    <BusinessList
+                      items={filtered}
+                      onSelect={onSelect}
+                      emptyMessage={emptyMessage}
+                    />
+                  </>
                 )}
               </div>
             ),
