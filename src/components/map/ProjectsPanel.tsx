@@ -21,6 +21,9 @@ export function ProjectsPanel({
   isDesktop,
 }: Props) {
   const [open, setOpen] = useState(true);
+  const expandedProject = expandedId
+    ? projects.find((p) => p.id === expandedId) ?? null
+    : null;
 
   const stopMapEvents = {
     onPointerDown: (e: React.PointerEvent) => e.stopPropagation(),
