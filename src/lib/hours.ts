@@ -187,3 +187,15 @@ export function useLiveStatus(hours: Hours | undefined): StatusInfo | null {
   }, [hours]);
   return info;
 }
+
+/** Reads hours_mon..hours_sun off a sheet row. Empty cells become null. */
+export function hoursFromRow(row: Record<string, unknown>): Hours {
+  const out = { ...EMPTY_HOURS };
+  for (const d of DAYS) {
+    const raw = row[`hours_${d}`];
+    if (raw === null || raw === undefined) continue;
+    const text = String(raw).trim();
+    out[d] = text.length ? text : null;
+  }
+  return out;
+}
