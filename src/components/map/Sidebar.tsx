@@ -132,7 +132,7 @@ export function SidebarContent({
         <PanelSwap show={selected ? "detail" : "list"}>
           {{
             list: (
-              <div className="h-full overflow-y-auto pb-2">
+              <div className="thin-scroll h-full overflow-y-auto pb-2">
                 {error ? (
                   <div className="px-4 py-8 text-center text-[13px] text-muted-foreground">
                     <p>Couldn't load the directory.</p>
@@ -150,31 +150,11 @@ export function SidebarContent({
                     Loading neighbourhood…
                   </div>
                 ) : (
-                  <>
-                    {projectFilterName && (
-                      <div className="px-3 pb-2 pt-1">
-                        <button
-                          type="button"
-                          onClick={() => onClearProjectFilter?.()}
-                          className="flex max-w-full items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px]"
-                          style={{
-                            backgroundColor: "rgba(216, 90, 48, 0.14)",
-                            color: "#E8A184",
-                          }}
-                        >
-                          <span className="truncate">
-                            Connections of {projectFilterName}
-                          </span>
-                          <X className="h-3 w-3 shrink-0" />
-                        </button>
-                      </div>
-                    )}
-                      <BusinessList
-                      items={filtered}
-                      onSelect={onSelect}
-                      emptyMessage={emptyMessage}
-                    />
-                  </>
+                  <BusinessList
+                    items={filtered}
+                    onSelect={onSelect}
+                    emptyMessage={emptyMessage}
+                  />
                 )}
               </div>
             ),
