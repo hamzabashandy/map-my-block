@@ -31,6 +31,8 @@ const EMPTY_MESSAGES: Record<Tab, string> = {
 
 function MapPage() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isWide = useMediaQuery("(min-width: 1024px)");
+  const [map, setMap] = useState<mapboxgl.Map | null>(null);
   const { items, loading, error, refresh } = useBusinesses();
   const [query, setQuery] = useState("");
   const [activeCategories, setActiveCategories] = useState<Set<CategoryId>>(
