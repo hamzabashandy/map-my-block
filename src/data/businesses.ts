@@ -6,6 +6,7 @@ import {
   Handshake,
   type LucideIcon,
 } from "lucide-react";
+import type { Hours } from "../lib/hours";
 
 export type CategoryId =
   | "business"
@@ -26,9 +27,8 @@ export type Business = {
   phone?: string;
   email?: string;
   website?: string;
-  hours: string;
-  status: "open" | "closing-soon" | "closed";
-  walking_minutes: number;
+  /** per-day opening hours; null = no fixed hours that day */
+  hours: Hours;
   description_short: string;
   description_long: string;
   photo_url?: string;
@@ -92,6 +92,26 @@ export const CATEGORY_LIST: CategoryMeta[] = [
   CATEGORIES.services_facilitator,
 ];
 
+const WEEKDAYS_9_5: Hours = {
+  mon: "09:00-17:00",
+  tue: "09:00-17:00",
+  wed: "09:00-17:00",
+  thu: "09:00-17:00",
+  fri: "09:00-17:00",
+  sat: "closed",
+  sun: "closed",
+};
+
+const NO_HOURS: Hours = {
+  mon: null,
+  tue: null,
+  wed: null,
+  thu: null,
+  fri: null,
+  sat: null,
+  sun: null,
+};
+
 export const BUSINESSES: Business[] = [
   {
     id: "canal-coffee",
@@ -102,9 +122,15 @@ export const BUSINESSES: Business[] = [
     mapped: true,
     address: "1089 Bank St, Ottawa, ON",
     phone: "(613) 555-0187",
-    hours: "Daily \u00b7 7am\u20135pm",
-    status: "open",
-    walking_minutes: 2,
+    hours: {
+      mon: "07:00-17:00",
+      tue: "07:00-17:00",
+      wed: "07:00-17:00",
+      thu: "07:00-17:00",
+      fri: "07:00-17:00",
+      sat: "08:00-16:00",
+      sun: "08:00-16:00",
+    },
     description_short: "Espresso & pastries",
     description_long:
       "A two-table espresso bar across from the canal. Beans roasted in Hintonburg, sourdough from the bakery next door.",
@@ -118,10 +144,8 @@ export const BUSINESSES: Business[] = [
     mapped: true,
     address: "260 Sunnyside Ave, Ottawa, ON",
     email: "hello@riversidehub.example",
-    hours: "Mon\u2013Fri \u00b7 9am\u20139pm",
-    status: "open",
-    walking_minutes: 8,
-    description_short: "Community space \u00b7 meeting rooms",
+    hours: WEEKDAYS_9_5,
+    description_short: "Community space · meeting rooms",
     description_long:
       "A community-run space with a free seed library, a tool-share, and bookable rooms for neighbourhood groups.",
   },
@@ -133,9 +157,15 @@ export const BUSINESSES: Business[] = [
     lng: -75.6845,
     mapped: true,
     address: "1049 Bank St, Ottawa, ON",
-    hours: "Mon\u2013Sat \u00b7 10am\u20138pm",
-    status: "open",
-    walking_minutes: 5,
+    hours: {
+      mon: "10:00-20:00",
+      tue: "10:00-20:00",
+      wed: "10:00-20:00",
+      thu: "10:00-20:00",
+      fri: "10:00-20:00",
+      sat: "10:00-17:00",
+      sun: "closed",
+    },
     description_short: "Public library branch",
     description_long:
       "A small neighbourhood branch with study space, community noticeboards, and weekly storytime.",
@@ -147,11 +177,9 @@ export const BUSINESSES: Business[] = [
     mapped: false,
     address: "",
     email: "hello@betweenthebridges.ca",
-    hours: "Seasonal \u00b7 spring and fall",
-    status: "open",
-    walking_minutes: 0,
+    hours: NO_HOURS,
     description_short: "Volunteer shoreline cleanups",
     description_long:
-      "A neighbour-organised effort to clear litter along the canal pathways twice a year. No fixed address \u2014 meeting points change each season.",
+      "A neighbour-organised effort to clear litter along the canal pathways twice a year. No fixed address — meeting points change each season.",
   },
 ];
