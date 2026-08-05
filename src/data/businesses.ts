@@ -86,8 +86,8 @@ export const CATEGORIES: Record<CategoryId, CategoryMeta> = {
 
 export const CATEGORY_LIST: CategoryMeta[] = [
   CATEGORIES.business,
-  CATEGORIES.community_group,
   CATEGORIES.institution,
+  CATEGORIES.community_group,
   CATEGORIES.project,
   CATEGORIES.services_facilitator,
 ];
