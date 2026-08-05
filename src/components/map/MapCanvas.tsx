@@ -15,6 +15,7 @@ type Props = {
   neighbourIds?: string[];
   onSelect: (id: string) => void;
   isDesktop: boolean;
+  onMapReady?: (map: mapboxgl.Map | null) => void;
 };
 
 type MarkerEntry = {
