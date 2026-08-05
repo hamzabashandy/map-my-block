@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import type mapboxgl from "mapbox-gl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BottomSheet } from "../components/map/BottomSheet";
 import { MapCanvas } from "../components/map/MapCanvas";
 import { ProjectsPanel } from "../components/map/ProjectsPanel";
@@ -25,20 +24,18 @@ export const Route = createFileRoute("/map")({
 
 const EMPTY_MESSAGES: Record<Tab, string> = {
   directory: "No places match your search.",
-  projects: "No projects yet.",
   services: "No services listed yet.",
 };
 
 function MapPage() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const isWide = useMediaQuery("(min-width: 1024px)");
-  const [map, setMap] = useState<mapboxgl.Map | null>(null);
   const { items, loading, error, refresh } = useBusinesses();
   const [query, setQuery] = useState("");
   const [activeCategories, setActiveCategories] = useState<Set<CategoryId>>(
     () => new Set(),
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("directory");
   const [snap, setSnap] = useState<0 | 1 | 2>(1);
   const adjacency = useMemo(() => buildAdjacency(items), [items]);
@@ -48,13 +45,32 @@ function MapPage() {
     [items],
   );
 
+  const expandedProject = expandedProjectId
+    ? projects.find((p) => p.id === expandedProjectId) ?? null
+    : null;
+  const projectConnectionIds = expandedProject
+    ? adjacency[expandedProject.id] ?? []
+    : [];
+  const projectFilterActive = Boolean(expandedProject);
+
+  // Escape clears the project filter
+  useEffect(() => {
+    if (!projectFilterActive) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setExpandedProjectId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [projectFilterActive]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
+    const connections = new Set(projectConnectionIds);
     return items.filter((b) => {
-      if (tab === "projects") {
-        if (b.category !== "project") return false;
-      } else if (tab === "services") {
+      if (tab === "services") {
         if (b.category !== "services_facilitator") return false;
+      } else if (projectFilterActive) {
+        if (!connections.has(b.id)) return false;
       } else {
         if (!DIRECTORY_CATEGORIES.includes(b.category)) return false;
         if (activeCategories.size > 0 && !activeCategories.has(b.category))
@@ -67,7 +83,14 @@ function MapPage() {
         b.description_long.toLowerCase().includes(q)
       );
     });
-  }, [items, query, activeCategories, tab]);
+  }, [
+    items,
+    query,
+    activeCategories,
+    tab,
+    projectFilterActive,
+    projectConnectionIds.join(","),
+  ]);
 
   const toggleCategory = (id: CategoryId) => {
     setActiveCategories((prev) => {
@@ -86,17 +109,36 @@ function MapPage() {
   const handleSelect = (id: string | null) => {
     setSelectedId(id);
     if (!id || isDesktop) return;
-    const picked = items.find((b) => b.id === id);
-    // Projects use the floating panel + connector lines: drop the sheet out of
-    // the way so the lines are visible.
-    setSnap(picked?.category === "project" ? 0 : 2);
+    setSnap(2);
   };
+
+  const handleToggleProject = (id: string) => {
+    setExpandedProjectId((prev) => {
+      const next = prev === id ? null : id;
+      if (next) {
+        setActiveCategories(new Set());
+        setSelectedId(null);
+        setTab("directory");
+        if (!isDesktop) setSnap(0);
+      }
+      return next;
+    });
+  };
+
+  const highlightIds =
+    projectFilterActive && projectConnectionIds.length > 0
+      ? projectConnectionIds
+      : null;
 
   const renderSidebar = (dragHandlers?: import("../components/map/BottomSheet").SheetDragHandlers) => (
     <SidebarContent
       businesses={items}
       filtered={filtered}
-      emptyMessage={EMPTY_MESSAGES[tab]}
+      emptyMessage={
+        projectFilterActive
+          ? "No connections recorded yet."
+          : EMPTY_MESSAGES[tab]
+      }
       loading={loading}
       error={error}
       onRefresh={refresh}
@@ -110,6 +152,8 @@ function MapPage() {
       tab={tab}
       onTabChange={handleTabChange}
       dragHandlers={dragHandlers}
+      projectFilterName={expandedProject?.name ?? null}
+      onClearProjectFilter={() => setExpandedProjectId(null)}
     />
   );
 
@@ -119,25 +163,21 @@ function MapPage() {
         businesses={items}
         selectedId={selectedId}
         neighbourIds={neighbourIds}
+        highlightIds={highlightIds}
         onSelect={(id) => handleSelect(id)}
         isDesktop={isDesktop}
-        onMapReady={setMap}
       />
 
       <ProjectsPanel
-        map={map}
         projects={projects}
-        businesses={items}
-        adjacency={adjacency}
-        selectedId={selectedId}
-        onSelect={handleSelect}
-        isWide={isWide}
+        expandedId={expandedProjectId}
+        onToggleExpand={handleToggleProject}
+        isDesktop={isDesktop}
       />
-
 
       {isDesktop ? (
         <aside
-          className="pointer-events-auto absolute left-4 top-4 z-10 flex w-[380px] flex-col overflow-hidden rounded-2xl border border-white/[0.06] backdrop-blur-xl"
+          className="pointer-events-auto absolute left-4 top-4 z-10 flex w-[280px] flex-col overflow-hidden rounded-2xl border border-white/[0.06] backdrop-blur-xl"
           style={{
             bottom: "1rem",
             backgroundColor: "rgba(20, 20, 22, 0.85)",
