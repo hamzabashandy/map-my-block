@@ -6,11 +6,8 @@ import { CATEGORIES, type Business } from "../../data/businesses";
 import { createMap, morphProgress } from "../../lib/map";
 import { loadConfig } from "../../lib/runtime-config";
 
-const STATUS_DOT: Record<Business["status"], string> = {
-  open: "#7BB661",
-  "closing-soon": "#E0A85B",
-  closed: "#E0685B",
-};
+import { getStatus } from "../../lib/hours";
+import { STATUS_COLORS } from "./StatusPill";
 
 type Props = {
   businesses: Business[];
@@ -452,11 +449,11 @@ function MarkerContent({
               marginTop: 2,
             }}
           >
-            {cat.label} · {business.walking_minutes} min walk
+            {cat.label}
           </span>
         </span>
       )}
-      {t > 0.5 && (
+      {t > 0.5 && getStatus(business.hours) && (
         <span
           style={{
             position: "absolute",
@@ -465,7 +462,7 @@ function MarkerContent({
             width: 7,
             height: 7,
             borderRadius: "50%",
-            background: STATUS_DOT[business.status],
+            background: STATUS_COLORS[getStatus(business.hours)?.status ?? "closed"],
             opacity: textOpacity,
             boxShadow: `0 0 0 2px rgba(20,20,22,0.92)`,
           }}

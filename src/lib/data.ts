@@ -55,9 +55,6 @@ function mapRow(row: RawRow): Business | null {
     ? (rawCat as CategoryId)
     : "business";
 
-  const normalizedStatus: Business["status"] =
-    status === "closing-soon" || status === "closed" ? status : "open";
-
   const name = s(row.name) ?? "Untitled";
 
   return {
@@ -71,9 +68,7 @@ function mapRow(row: RawRow): Business | null {
     phone: s(row.phone),
     email: s(row.email),
     website: s(row.website),
-    hours: s(row.hours) ?? "",
-    status: normalizedStatus,
-    walking_minutes: n(row.walking_minutes) ?? 0,
+    hours: hoursFromRow(row),
     description_short: s(row.description_short) ?? "",
     description_long: s(row.description_long) ?? "",
     photo_url: s(row.photo_url),
