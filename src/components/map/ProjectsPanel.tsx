@@ -139,10 +139,17 @@ export function ProjectsPanel({
                   >
                     <div className="overflow-hidden">
                       {p.description_long && (
-                        <p className="px-3 pb-3 pl-7 text-[11.5px] leading-relaxed text-white/55">
+                        <p className="px-3 pb-2 pl-7 text-[11.5px] leading-relaxed text-white/55">
                           {p.description_long}
                         </p>
                       )}
+                      <Link
+                        to="/project/$id"
+                        params={{ id: p.id }}
+                        className="mb-3 ml-7 inline-block text-[11.5px] font-medium text-white/70 transition-colors hover:text-white"
+                      >
+                        Open project →
+                      </Link>
                     </div>
                   </div>
                 </div>
