@@ -13,6 +13,7 @@ type Props = {
   businesses: Business[];
   selectedId: string | null;
   neighbourIds?: string[];
+  highlightIds?: string[] | null;
   onSelect: (id: string) => void;
   isDesktop: boolean;
   onMapReady?: (map: mapboxgl.Map | null) => void;
@@ -30,6 +31,7 @@ export function MapCanvas({
   businesses,
   selectedId,
   neighbourIds,
+  highlightIds,
   onSelect,
   isDesktop,
   onMapReady,
@@ -47,7 +49,10 @@ export function MapCanvas({
   onSelectRef.current = onSelect;
   const onMapReadyRef = useRef(onMapReady);
   onMapReadyRef.current = onMapReady;
+  const highlightRef = useRef<Set<string> | null>(null);
+  highlightRef.current = highlightIds ? new Set(highlightIds) : null;
   const neighbourKey = (neighbourIds ?? []).join(",");
+  const highlightKey = (highlightIds ?? []).join(",");
 
   const [token, setToken] = useState<string | null>(null);
   const [visibleError, setVisibleError] = useState<string | null>(null);
@@ -192,7 +197,7 @@ export function MapCanvas({
   // Re-render on selection / neighbourhood change
   useEffect(() => {
     updateMarkers();
-  }, [selectedId, neighbourKey]);
+  }, [selectedId, neighbourKey, highlightKey]);
 
   // Pan to selected (or frame its mapped neighbours when it has no location)
   useEffect(() => {
@@ -273,8 +278,20 @@ export function MapCanvas({
       : undefined;
     const accent = selected ? CATEGORIES[selected.category].color : null;
 
+    const highlight = highlightRef.current;
+
     for (const { entry } of entries) {
       const id = entry.business.id;
+      if (highlight) {
+        const localT0 = morphOk.has(id) ? t : 0;
+        paintMarker(
+          entry,
+          localT0,
+          highlight.has(id) ? "normal" : "faded",
+          null,
+        );
+        continue;
+      }
       const isSelected = selId === id;
       const isNeighbour = !isSelected && neighboursRef.current.has(id);
       const state: MarkerState = !selId
@@ -312,7 +329,7 @@ export function MapCanvas({
   );
 }
 
-type MarkerState = "normal" | "selected" | "neighbour" | "dim";
+type MarkerState = "normal" | "selected" | "neighbour" | "dim" | "faded";
 
 function paintMarker(
   entry: MarkerEntry,
@@ -354,7 +371,7 @@ function paintMarker(
     border: ${border};
     box-shadow: ${shadow};
     transform: scale(${scale});
-    opacity: ${state === "dim" ? 0.25 : 1};
+    opacity: ${state === "faded" ? 0.12 : state === "dim" ? 0.25 : 1};
     transition: all 200ms ease, background 300ms ease, opacity 200ms ease;
     cursor: pointer;
     display: flex;
