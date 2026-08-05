@@ -32,6 +32,7 @@ export function MapCanvas({
   neighbourIds,
   onSelect,
   isDesktop,
+  onMapReady,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
