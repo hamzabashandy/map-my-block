@@ -1,10 +1,12 @@
 import { Map as MapIcon, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
 import { type Business, type CategoryId } from "../../data/businesses";
 import type { SheetDragHandlers } from "./BottomSheet";
 import { BusinessList } from "./BusinessList";
 import { CategoryPills } from "./CategoryPills";
 import { DetailPanel } from "./DetailPanel";
 import { SearchBar } from "./SearchBar";
+import { ServiceSignupForm } from "./ServiceSignupForm";
 
 export type Tab = "directory" | "services";
 
