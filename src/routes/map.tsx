@@ -57,6 +57,14 @@ function MapPage() {
     : [];
   const projectFilterActive = Boolean(expandedProject);
 
+  // Deep link: /map?select=<id> preselects an entry once data is loaded
+  useEffect(() => {
+    if (!select) return;
+    if (!items.some((b) => b.id === select)) return;
+    setSelectedId(select);
+    if (!isDesktop) setSnap(2);
+  }, [select, items, isDesktop]);
+
   // Escape clears the project filter
   useEffect(() => {
     if (!projectFilterActive) return;
