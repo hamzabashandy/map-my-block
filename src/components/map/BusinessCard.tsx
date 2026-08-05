@@ -1,4 +1,5 @@
 import { CATEGORIES, type Business } from "../../data/businesses";
+import { useLiveStatus } from "../../lib/hours";
 import { StatusPill } from "./StatusPill";
 
 export function BusinessCard({
@@ -10,6 +11,7 @@ export function BusinessCard({
 }) {
   const cat = CATEGORIES[business.category];
   const Icon = cat.icon;
+  const status = useLiveStatus(business.hours);
   return (
     <button
       type="button"
@@ -27,12 +29,10 @@ export function BusinessCard({
           {business.name}
         </span>
         <span className="block truncate text-[12.5px] text-muted-foreground">
-          {business.mapped
-            ? `${business.description_short} · ${business.walking_minutes} min walk`
-            : business.description_short}
+          {business.description_short}
         </span>
       </span>
-      <StatusPill status={business.status} />
+      <StatusPill info={status} />
     </button>
   );
 }
