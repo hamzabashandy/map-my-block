@@ -13,7 +13,7 @@ export function CategoryPills({
     ? CATEGORY_LIST.filter((c) => categories.includes(c.id))
     : CATEGORY_LIST;
   return (
-    <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1">
+    <div className="-mx-1 flex flex-wrap gap-2 px-1">
       {list.map((cat) => {
         const Icon = cat.icon;
         const isActive = active.has(cat.id);

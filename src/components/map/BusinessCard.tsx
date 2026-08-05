@@ -25,10 +25,10 @@ export function BusinessCard({
         <Icon className="h-4 w-4" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[15px] font-medium text-foreground">
+        <span className="block truncate text-[13.5px] font-medium text-foreground">
           {business.name}
         </span>
-        <span className="block truncate text-[12.5px] text-muted-foreground">
+        <span className="block truncate text-[11.5px] text-muted-foreground">
           {business.description_short}
         </span>
       </span>

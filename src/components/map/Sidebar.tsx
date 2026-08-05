@@ -1,4 +1,4 @@
-import { Map as MapIcon, RefreshCw } from "lucide-react";
+import { Map as MapIcon, RefreshCw, X } from "lucide-react";
 import { type Business, type CategoryId } from "../../data/businesses";
 import type { SheetDragHandlers } from "./BottomSheet";
 import { BusinessList } from "./BusinessList";
@@ -6,7 +6,7 @@ import { CategoryPills } from "./CategoryPills";
 import { DetailPanel } from "./DetailPanel";
 import { SearchBar } from "./SearchBar";
 
-export type Tab = "directory" | "projects" | "services";
+export type Tab = "directory" | "services";
 
 export const DIRECTORY_CATEGORIES: CategoryId[] = [
   "business",
@@ -31,6 +31,8 @@ type Props = {
   tab: Tab;
   onTabChange: (t: Tab) => void;
   dragHandlers?: SheetDragHandlers;
+  projectFilterName?: string | null;
+  onClearProjectFilter?: () => void;
 };
 
 export function SidebarContent({
@@ -50,6 +52,8 @@ export function SidebarContent({
   tab,
   onTabChange,
   dragHandlers,
+  projectFilterName,
+  onClearProjectFilter,
 }: Props) {
   const selected = selectedId
     ? businesses.find((b) => b.id === selectedId) ?? null
@@ -105,7 +109,7 @@ export function SidebarContent({
           >
             <SearchBar value={query} onChange={onQueryChange} />
           </div>
-          {tab === "directory" && (
+          {tab === "directory" && !projectFilterName && (
             <CategoryPills
               active={activeCategories}
               onToggle={onToggleCategory}
@@ -138,11 +142,31 @@ export function SidebarContent({
                     Loading neighbourhood…
                   </div>
                 ) : (
-                  <BusinessList
-                    items={filtered}
-                    onSelect={onSelect}
-                    emptyMessage={emptyMessage}
-                  />
+                  <>
+                    {projectFilterName && (
+                      <div className="px-3 pb-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => onClearProjectFilter?.()}
+                          className="flex max-w-full items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px]"
+                          style={{
+                            backgroundColor: "rgba(216, 90, 48, 0.14)",
+                            color: "#E8A184",
+                          }}
+                        >
+                          <span className="truncate">
+                            Connections of {projectFilterName}
+                          </span>
+                          <X className="h-3 w-3 shrink-0" />
+                        </button>
+                      </div>
+                    )}
+                      <BusinessList
+                      items={filtered}
+                      onSelect={onSelect}
+                      emptyMessage={emptyMessage}
+                    />
+                  </>
                 )}
               </div>
             ),
@@ -165,7 +189,6 @@ export function SidebarContent({
             {(
               [
                 { id: "directory", label: "Directory" },
-                { id: "projects", label: "Projects" },
                 { id: "services", label: "Services" },
               ] as { id: Tab; label: string }[]
             ).map((t) => {
