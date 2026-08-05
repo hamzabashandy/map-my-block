@@ -59,7 +59,7 @@ export function DetailPanel({
             <Icon className="h-3.5 w-3.5" />
             {cat.label}
           </span>
-          <StatusPill status={business.status} />
+          <StatusPill info={status} />
         </div>
 
         <dl className="mt-5 space-y-2.5 text-[13.5px]">
