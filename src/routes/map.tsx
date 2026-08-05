@@ -71,6 +71,8 @@ function MapPage() {
         if (b.category !== "services_facilitator") return false;
       } else if (projectFilterActive) {
         if (!connections.has(b.id)) return false;
+        if (activeCategories.size > 0 && !activeCategories.has(b.category))
+          return false;
       } else {
         if (!DIRECTORY_CATEGORIES.includes(b.category)) return false;
         if (activeCategories.size > 0 && !activeCategories.has(b.category))
