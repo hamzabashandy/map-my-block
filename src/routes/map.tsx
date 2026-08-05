@@ -43,6 +43,10 @@ function MapPage() {
   const [snap, setSnap] = useState<0 | 1 | 2>(1);
   const adjacency = useMemo(() => buildAdjacency(items), [items]);
   const neighbourIds = selectedId ? adjacency[selectedId] ?? [] : [];
+  const projects = useMemo(
+    () => items.filter((b) => b.category === "project"),
+    [items],
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
