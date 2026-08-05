@@ -6,6 +6,7 @@ import {
   type Business,
   type CategoryId,
 } from "../data/businesses";
+import { hoursFromRow } from "./hours";
 import { loadConfig } from "./runtime-config";
 
 type RawRow = Record<string, unknown>;

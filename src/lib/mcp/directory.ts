@@ -5,6 +5,7 @@ import {
   type Business,
   type CategoryId,
 } from "../../data/businesses";
+import { hoursFromRow } from "../hours";
 
 type RawRow = Record<string, unknown>;
 

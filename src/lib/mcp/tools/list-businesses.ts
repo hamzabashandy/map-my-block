@@ -6,7 +6,7 @@ export default defineTool({
   name: "list_businesses",
   title: "List neighbourhood businesses",
   description:
-    "List the businesses, makers, and community spaces in the iCBIG neighbourhood directory. Optionally filter by category or by maximum walking time.",
+    "List the businesses, makers, and community spaces in the iCBIG neighbourhood directory. Optionally filter by category.",
   inputSchema: {
     category: z
       .enum([
@@ -18,19 +18,12 @@ export default defineTool({
       ])
       .optional()
       .describe("Only return listings in this category."),
-    max_walking_minutes: z
-      .number()
-      .optional()
-      .describe("Only return listings within this many minutes of walking."),
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ category, max_walking_minutes }) => {
+  handler: async ({ category }) => {
     const all = await loadDirectory();
     const items = all.filter(
-      (b) =>
-        (!category || b.category === (category as CategoryId)) &&
-        (max_walking_minutes === undefined ||
-          b.walking_minutes <= max_walking_minutes),
+      (b) => !category || b.category === (category as CategoryId),
     );
     return {
       content: [
@@ -42,7 +35,7 @@ export default defineTool({
               : items
                   .map(
                     (b) =>
-                      `${b.name} (${b.category}) — ${b.address}. ${b.walking_minutes} min walk. ${b.description_short}`,
+                      `${b.name} (${b.category}) — ${b.address}. ${b.description_short}`,
                   )
                   .join("\n"),
         },
