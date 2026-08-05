@@ -7,7 +7,9 @@ import {
   Phone,
 } from "lucide-react";
 import { CATEGORIES, type Business } from "../../data/businesses";
+import { formatHours, hasNoHours, useLiveStatus } from "../../lib/hours";
 import { StatusPill } from "./StatusPill";
+
 
 export function DetailPanel({
   business,
