@@ -19,6 +19,14 @@ type Props = {
 
 type Line = { x1: number; y1: number; x2: number; y2: number };
 
+function sameLines(a: Line[], b: Line[]): boolean {
+  if (a.length !== b.length) return false;
+  return a.every(
+    (l, i) =>
+      l.x1 === b[i].x1 && l.y1 === b[i].y1 && l.x2 === b[i].x2 && l.y2 === b[i].y2,
+  );
+}
+
 export function ProjectsPanel({
   map,
   projects,
@@ -54,6 +62,7 @@ export function ProjectsPanel({
     (b) => b.mapped && b.lat !== undefined && b.lng !== undefined,
   );
   const unmappedNeighbours = neighbours.filter((b) => !b.mapped);
+  const neighbourKey = mappedNeighbours.map((b) => b.id).join(",");
 
   const draw = useCallback(() => {
     const host = hostRef.current;
@@ -83,8 +92,9 @@ export function ProjectsPanel({
         y2: pt.y,
       });
     }
-    setLines(next);
-  }, [map, open, selectedProject, mappedNeighbours]);
+    setLines((prev) => (sameLines(prev, next) ? prev : next));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, open, selectedProject, neighbourKey]);
 
   const schedule = useCallback(() => {
     if (rafRef.current != null) return;
