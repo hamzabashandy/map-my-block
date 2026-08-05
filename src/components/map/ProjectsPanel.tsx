@@ -1,4 +1,5 @@
-import { Layers, X } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Layers, Minus } from "lucide-react";
 import { useState } from "react";
 import { CATEGORIES, type Business } from "../../data/businesses";
 
