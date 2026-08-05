@@ -24,9 +24,14 @@ export function DetailPanel({
 }) {
   const cat = CATEGORIES[business.category];
   const Icon = cat.icon;
+  const status = useLiveStatus(business.hours);
+  const hoursText = hasNoHours(business.hours)
+    ? null
+    : formatHours(business.hours);
   const directionsUrl = business.mapped
     ? `https://www.google.com/maps/dir/?api=1&destination=${business.lat},${business.lng}`
     : null;
+
 
   return (
     <div className="flex h-full flex-col">
