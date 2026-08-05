@@ -109,11 +109,19 @@ export function SidebarContent({
           >
             <SearchBar value={query} onChange={onQueryChange} />
           </div>
-          {tab === "directory" && !projectFilterName && (
+          {tab === "directory" && (
             <CategoryPills
               active={activeCategories}
               onToggle={onToggleCategory}
               categories={DIRECTORY_CATEGORIES}
+              projectPill={
+                projectFilterName
+                  ? {
+                      name: projectFilterName,
+                      onDeactivate: () => onClearProjectFilter?.(),
+                    }
+                  : null
+              }
             />
           )}
         </div>
