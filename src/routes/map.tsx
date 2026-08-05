@@ -10,6 +10,9 @@ import { buildAdjacency, useBusinesses } from "../lib/data";
 
 export const Route = createFileRoute("/map")({
   component: MapPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    select: typeof search.select === "string" ? search.select : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Map — iCBIG neighbourhood directory" },
@@ -28,6 +31,7 @@ const EMPTY_MESSAGES: Record<Tab, string> = {
 };
 
 function MapPage() {
+  const { select } = Route.useSearch();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { items, loading, error, refresh } = useBusinesses();
   const [query, setQuery] = useState("");
@@ -52,6 +56,14 @@ function MapPage() {
     ? adjacency[expandedProject.id] ?? []
     : [];
   const projectFilterActive = Boolean(expandedProject);
+
+  // Deep link: /map?select=<id> preselects an entry once data is loaded
+  useEffect(() => {
+    if (!select) return;
+    if (!items.some((b) => b.id === select)) return;
+    setSelectedId(select);
+    if (!isDesktop) setSnap(2);
+  }, [select, items, isDesktop]);
 
   // Escape clears the project filter
   useEffect(() => {

@@ -1,4 +1,5 @@
-import { Layers, X } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Layers, Minus } from "lucide-react";
 import { useState } from "react";
 import { CATEGORIES, type Business } from "../../data/businesses";
 
@@ -20,6 +21,9 @@ export function ProjectsPanel({
   isDesktop,
 }: Props) {
   const [open, setOpen] = useState(true);
+  const expandedProject = expandedId
+    ? projects.find((p) => p.id === expandedId) ?? null
+    : null;
 
   const stopMapEvents = {
     onPointerDown: (e: React.PointerEvent) => e.stopPropagation(),
@@ -45,7 +49,7 @@ export function ProjectsPanel({
           type="button"
           onClick={() => setOpen(true)}
           {...stopMapEvents}
-          className="pointer-events-auto absolute flex items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-xs text-white/80 backdrop-blur-xl"
+          className="pointer-events-auto absolute flex max-w-[220px] items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-xs text-white/80 backdrop-blur-xl"
           style={{
             right: INSET,
             top: INSET,
@@ -53,8 +57,20 @@ export function ProjectsPanel({
             backgroundColor: "rgba(20,20,22,0.85)",
           }}
         >
-          <Layers size={14} style={{ color: PROJECT_COLOR }} />
-          Projects
+          {expandedProject ? (
+            <>
+              <span
+                className="block h-2 w-2 shrink-0 rounded-full"
+                style={{ backgroundColor: PROJECT_COLOR }}
+              />
+              <span className="truncate">{expandedProject.name}</span>
+            </>
+          ) : (
+            <>
+              <Layers size={14} style={{ color: PROJECT_COLOR }} />
+              Projects
+            </>
+          )}
         </button>
       ) : (
         <div
@@ -76,9 +92,9 @@ export function ProjectsPanel({
               type="button"
               onClick={() => setOpen(false)}
               className="ml-auto rounded-md p-1 text-white/45 transition-colors hover:text-white/80"
-              aria-label="Close projects panel"
+              aria-label="Minimize projects panel"
             >
-              <X size={14} />
+              <Minus size={14} />
             </button>
           </div>
 
@@ -123,10 +139,17 @@ export function ProjectsPanel({
                   >
                     <div className="overflow-hidden">
                       {p.description_long && (
-                        <p className="px-3 pb-3 pl-7 text-[11.5px] leading-relaxed text-white/55">
+                        <p className="px-3 pb-2 pl-7 text-[11.5px] leading-relaxed text-white/55">
                           {p.description_long}
                         </p>
                       )}
+                      <Link
+                        to="/project/$id"
+                        params={{ id: p.id }}
+                        className="mb-3 ml-7 inline-block text-[11.5px] font-medium text-white/70 transition-colors hover:text-white"
+                      >
+                        Open project →
+                      </Link>
                     </div>
                   </div>
                 </div>
