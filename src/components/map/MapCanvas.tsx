@@ -127,6 +127,7 @@ export function MapCanvas({
       map.off("error", handleMapError);
       map.remove();
       mapRef.current = null;
+      onMapReadyRef.current?.(null);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDesktop, token]);
