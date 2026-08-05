@@ -99,6 +99,7 @@ export function MapCanvas({
 
     setVisibleError(null);
     mapRef.current = map;
+    onMapReadyRef.current?.(map);
 
     if (isDesktop) {
       map.addControl(
