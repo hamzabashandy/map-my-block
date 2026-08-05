@@ -68,6 +68,12 @@ export function SidebarContent({
       .filter((b): b is Business => Boolean(b));
   })();
 
+  const [serviceFormOpen, setServiceFormOpen] = useState(false);
+  useEffect(() => {
+    if (tab !== "services") setServiceFormOpen(false);
+  }, [tab]);
+  const showServiceForm = tab === "services" && serviceFormOpen && !selected;
+
   const stopDrag = (e: React.SyntheticEvent) => e.stopPropagation();
 
   return (
