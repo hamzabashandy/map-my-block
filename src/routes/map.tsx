@@ -31,6 +31,7 @@ const EMPTY_MESSAGES: Record<Tab, string> = {
 };
 
 function MapPage() {
+  const { select } = Route.useSearch();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { items, loading, error, refresh } = useBusinesses();
   const [query, setQuery] = useState("");
