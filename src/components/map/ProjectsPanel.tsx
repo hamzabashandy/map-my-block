@@ -46,7 +46,7 @@ export function ProjectsPanel({
           type="button"
           onClick={() => setOpen(true)}
           {...stopMapEvents}
-          className="pointer-events-auto absolute flex items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-xs text-white/80 backdrop-blur-xl"
+          className="pointer-events-auto absolute flex max-w-[220px] items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-xs text-white/80 backdrop-blur-xl"
           style={{
             right: INSET,
             top: INSET,
@@ -54,8 +54,20 @@ export function ProjectsPanel({
             backgroundColor: "rgba(20,20,22,0.85)",
           }}
         >
-          <Layers size={14} style={{ color: PROJECT_COLOR }} />
-          Projects
+          {expandedProject ? (
+            <>
+              <span
+                className="block h-2 w-2 shrink-0 rounded-full"
+                style={{ backgroundColor: PROJECT_COLOR }}
+              />
+              <span className="truncate">{expandedProject.name}</span>
+            </>
+          ) : (
+            <>
+              <Layers size={14} style={{ color: PROJECT_COLOR }} />
+              Projects
+            </>
+          )}
         </button>
       ) : (
         <div
@@ -77,9 +89,9 @@ export function ProjectsPanel({
               type="button"
               onClick={() => setOpen(false)}
               className="ml-auto rounded-md p-1 text-white/45 transition-colors hover:text-white/80"
-              aria-label="Close projects panel"
+              aria-label="Minimize projects panel"
             >
-              <X size={14} />
+              <Minus size={14} />
             </button>
           </div>
 
