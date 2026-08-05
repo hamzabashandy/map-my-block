@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type mapboxgl from "mapbox-gl";
 import { useMemo, useState } from "react";
 import { BottomSheet } from "../components/map/BottomSheet";
 import { MapCanvas } from "../components/map/MapCanvas";
+import { ProjectsPanel } from "../components/map/ProjectsPanel";
 import { DIRECTORY_CATEGORIES, SidebarContent, type Tab } from "../components/map/Sidebar";
 import type { CategoryId } from "../data/businesses";
 import { useMediaQuery } from "../hooks/useMediaQuery";
@@ -29,6 +31,8 @@ const EMPTY_MESSAGES: Record<Tab, string> = {
 
 function MapPage() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isWide = useMediaQuery("(min-width: 1024px)");
+  const [map, setMap] = useState<mapboxgl.Map | null>(null);
   const { items, loading, error, refresh } = useBusinesses();
   const [query, setQuery] = useState("");
   const [activeCategories, setActiveCategories] = useState<Set<CategoryId>>(
@@ -39,6 +43,10 @@ function MapPage() {
   const [snap, setSnap] = useState<0 | 1 | 2>(1);
   const adjacency = useMemo(() => buildAdjacency(items), [items]);
   const neighbourIds = selectedId ? adjacency[selectedId] ?? [] : [];
+  const projects = useMemo(
+    () => items.filter((b) => b.category === "project"),
+    [items],
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -77,7 +85,11 @@ function MapPage() {
 
   const handleSelect = (id: string | null) => {
     setSelectedId(id);
-    if (id && !isDesktop) setSnap(2);
+    if (!id || isDesktop) return;
+    const picked = items.find((b) => b.id === id);
+    // Projects use the floating panel + connector lines: drop the sheet out of
+    // the way so the lines are visible.
+    setSnap(picked?.category === "project" ? 0 : 2);
   };
 
   const renderSidebar = (dragHandlers?: import("../components/map/BottomSheet").SheetDragHandlers) => (
@@ -109,7 +121,19 @@ function MapPage() {
         neighbourIds={neighbourIds}
         onSelect={(id) => handleSelect(id)}
         isDesktop={isDesktop}
+        onMapReady={setMap}
       />
+
+      <ProjectsPanel
+        map={map}
+        projects={projects}
+        businesses={items}
+        adjacency={adjacency}
+        selectedId={selectedId}
+        onSelect={handleSelect}
+        isWide={isWide}
+      />
+
 
       {isDesktop ? (
         <aside

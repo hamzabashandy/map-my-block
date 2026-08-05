@@ -15,6 +15,7 @@ type Props = {
   neighbourIds?: string[];
   onSelect: (id: string) => void;
   isDesktop: boolean;
+  onMapReady?: (map: mapboxgl.Map | null) => void;
 };
 
 type MarkerEntry = {
@@ -31,6 +32,7 @@ export function MapCanvas({
   neighbourIds,
   onSelect,
   isDesktop,
+  onMapReady,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -43,6 +45,8 @@ export function MapCanvas({
   selectedRef.current = selectedId;
   neighboursRef.current = new Set(neighbourIds ?? []);
   onSelectRef.current = onSelect;
+  const onMapReadyRef = useRef(onMapReady);
+  onMapReadyRef.current = onMapReady;
   const neighbourKey = (neighbourIds ?? []).join(",");
 
   const [token, setToken] = useState<string | null>(null);
@@ -95,6 +99,7 @@ export function MapCanvas({
 
     setVisibleError(null);
     mapRef.current = map;
+    onMapReadyRef.current?.(map);
 
     if (isDesktop) {
       map.addControl(
@@ -122,6 +127,7 @@ export function MapCanvas({
       map.off("error", handleMapError);
       map.remove();
       mapRef.current = null;
+      onMapReadyRef.current?.(null);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDesktop, token]);
