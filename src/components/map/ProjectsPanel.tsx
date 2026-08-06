@@ -14,6 +14,9 @@ type Props = {
   isDesktop: boolean;
   /** Reports the vertical space the panel occupies from the top of the map (0 when minimized). */
   onHeightChange?: (height: number) => void;
+  /** Optional controlled open/minimized state. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 export function ProjectsPanel({
@@ -22,8 +25,15 @@ export function ProjectsPanel({
   onToggleExpand,
   isDesktop,
   onHeightChange,
+  open: openProp,
+  onOpenChange,
 }: Props) {
-  const [open, setOpen] = useState(true);
+  const [openState, setOpenState] = useState(true);
+  const open = openProp ?? openState;
+  const setOpen = (next: boolean) => {
+    setOpenState(next);
+    onOpenChange?.(next);
+  };
   const cardRef = useRef<HTMLDivElement>(null);
   const expandedProject = expandedId
     ? projects.find((p) => p.id === expandedId) ?? null
@@ -77,7 +87,9 @@ export function ProjectsPanel({
           {...stopMapEvents}
           className="pointer-events-auto absolute flex max-w-[220px] items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-xs text-white/80 backdrop-blur-xl"
           style={{
-            right: INSET,
+            ...(isDesktop
+              ? { right: INSET }
+              : { left: "50%", transform: "translateX(-50%)" }),
             top: INSET,
             zIndex: 2,
             backgroundColor: "rgba(20,20,22,0.85)",

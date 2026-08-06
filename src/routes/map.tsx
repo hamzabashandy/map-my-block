@@ -50,6 +50,7 @@ function MapPage() {
   const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("directory");
   const [snap, setSnap] = useState<0 | 1 | 2>(1);
+  const [panelOpen, setPanelOpen] = useState(true);
   const [panelHeight, setPanelHeight] = useState(0);
   const [sheetHeight, setSheetHeight] = useState(0);
   const handlePanelHeight = useCallback((h: number) => setPanelHeight(h), []);
@@ -228,6 +229,8 @@ function MapPage() {
         onToggleExpand={handleToggleProject}
         isDesktop={isDesktop}
         onHeightChange={handlePanelHeight}
+        open={panelOpen}
+        onOpenChange={setPanelOpen}
       />
 
       {isDesktop ? (
@@ -248,6 +251,7 @@ function MapPage() {
           onSnapChange={setSnap}
           onHeightChange={handleSheetHeight}
           reservedTop={panelHeight}
+          onTallSheet={() => setPanelOpen(false)}
         >
           {(handlers) => renderSidebar(handlers)}
         </BottomSheet>

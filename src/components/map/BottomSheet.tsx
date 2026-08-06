@@ -23,6 +23,7 @@ export function BottomSheet({
   onUserDrag,
   onHeightChange,
   reservedTop = 0,
+  onTallSheet,
 }: {
   children: (handlers: SheetDragHandlers) => React.ReactNode;
   snap: SnapIndex;
@@ -32,6 +33,8 @@ export function BottomSheet({
   onHeightChange?: (height: number) => void;
   /** Space at the top of the viewport the sheet must never grow into. */
   reservedTop?: number;
+  /** Fired when the sheet grows tall enough to compete with the projects panel. */
+  onTallSheet?: () => void;
 }) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{
@@ -78,6 +81,7 @@ export function BottomSheet({
       viewportHeight() * 0.96,
       Math.max(60, dragState.current.startHeight - dy),
     );
+    if (next > rawViewportHeight() * 0.6) onTallSheet?.();
     setDragHeight(next);
   };
 
@@ -91,22 +95,27 @@ export function BottomSheet({
       const next: SnapIndex = snap === 2 ? 1 : 2;
       setDragHeight(null);
       onUserDrag?.();
+      if (next === 2) onTallSheet?.();
       onSnapChange(next);
       return;
     }
 
     const current = dragHeight ?? heightForSnap(snap);
-    let nearest: SnapIndex = 0;
-    let best = Infinity;
-    SNAPS.forEach((frac, i) => {
-      const d = Math.abs(viewportHeight() * frac - current);
-      if (d < best) {
-        best = d;
-        nearest = i as SnapIndex;
-      }
-    });
+    const nearest = ((): SnapIndex => {
+      let idx: SnapIndex = 0;
+      let best = Infinity;
+      SNAPS.forEach((frac, i) => {
+        const d = Math.abs(viewportHeight() * frac - current);
+        if (d < best) {
+          best = d;
+          idx = i as SnapIndex;
+        }
+      });
+      return idx;
+    })();
     setDragHeight(null);
     onUserDrag?.();
+    if (nearest === 2) onTallSheet?.();
     onSnapChange(nearest);
   };
 
