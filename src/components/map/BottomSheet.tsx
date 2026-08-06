@@ -20,10 +20,15 @@ export function BottomSheet({
   children,
   snap,
   onSnapChange,
+  onUserDrag,
+  reservedTop = 0,
 }: {
   children: (handlers: SheetDragHandlers) => React.ReactNode;
   snap: SnapIndex;
   onSnapChange: (s: SnapIndex) => void;
+  onUserDrag?: () => void;
+  /** Space at the top of the viewport the sheet must never grow into. */
+  reservedTop?: number;
 }) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{
@@ -34,13 +39,19 @@ export function BottomSheet({
   } | null>(null);
   const [dragHeight, setDragHeight] = useState<number | null>(null);
 
-  const viewportHeight = () =>
+  const rawViewportHeight = () =>
     typeof window === "undefined" ? 800 : window.innerHeight;
+  const available = Math.max(
+    160,
+    rawViewportHeight() - (reservedTop > 0 ? reservedTop + 16 : 0),
+  );
+  const viewportHeight = () => available;
 
   const heightForSnap = useCallback(
     (s: SnapIndex) => Math.round(viewportHeight() * SNAPS[s]),
-    [],
+    [available],
   );
+
 
   const onPointerDown = (e: React.PointerEvent) => {
     (e.target as Element).setPointerCapture?.(e.pointerId);
@@ -76,6 +87,7 @@ export function BottomSheet({
       // Tap — toggle between expanded/half
       const next: SnapIndex = snap === 2 ? 1 : 2;
       setDragHeight(null);
+      onUserDrag?.();
       onSnapChange(next);
       return;
     }
@@ -91,6 +103,7 @@ export function BottomSheet({
       }
     });
     setDragHeight(null);
+    onUserDrag?.();
     onSnapChange(nearest);
   };
 
