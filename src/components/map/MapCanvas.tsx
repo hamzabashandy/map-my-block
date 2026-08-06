@@ -57,6 +57,9 @@ export function MapCanvas({
   onMapReadyRef.current = onMapReady;
   const filteredRef = useRef<Set<string> | null>(null);
   filteredRef.current = filteredIds ? new Set(filteredIds) : null;
+  const eventCountsRef = useRef<Record<string, number>>({});
+  eventCountsRef.current = eventCounts ?? {};
+  const eventCountsKey = JSON.stringify(eventCounts ?? {});
   const neighbourKey = (neighbourIds ?? []).join(",");
   const filteredKey = (filteredIds ?? []).join(",");
   const didInitialFitRef = useRef(false);
