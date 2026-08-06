@@ -112,6 +112,7 @@ export function BottomSheet({
     });
     setDragHeight(null);
     onUserDrag?.();
+    if (nearest === 2) onTallSheet?.();
     onSnapChange(nearest);
   };
 
