@@ -489,17 +489,21 @@ function paintMarker(
     cursor: pointer;
     display: flex;
     align-items: center;
-    overflow: hidden;
+    overflow: visible;
     backdrop-filter: blur(6px);
     color: white;
     z-index: ${selected ? 20 : state === "neighbour" ? 10 : 1};
   `;
+
+  const bg = t > 0.5 ? "rgba(20,20,22,0.94)" : darken(cat.color);
+  paintEventBadge(entry, eventCount, t > 0.5, bg);
 
   entry.root.render(
     <MarkerContent
       business={entry.business}
       t={t}
       textOpacity={textOpacity}
+      eventCount={eventCount}
     />,
   );
 }
