@@ -1,14 +1,17 @@
 import { Map as MapIcon, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { type Business, type CategoryId } from "../../data/businesses";
+import type { Event } from "../../lib/events";
 import type { SheetDragHandlers } from "./BottomSheet";
 import { BusinessList } from "./BusinessList";
+import { CalendarPanel } from "./CalendarPanel";
 import { CategoryPills } from "./CategoryPills";
 import { DetailPanel } from "./DetailPanel";
+import { EventProposalForm } from "./EventProposalForm";
 import { SearchBar } from "./SearchBar";
 import { ServiceSignupForm } from "./ServiceSignupForm";
 
-export type Tab = "directory" | "services";
+export type Tab = "directory" | "services" | "calendar";
 
 export const DIRECTORY_CATEGORIES: CategoryId[] = [
   "business",
@@ -35,7 +38,14 @@ type Props = {
   dragHandlers?: SheetDragHandlers;
   projectFilterName?: string | null;
   onClearProjectFilter?: () => void;
+  events: Event[];
+  eventsLoading: boolean;
+  eventsError: string | null;
+  selectedDay: string;
+  onSelectDay: (date: string) => void;
+  onSelectProject: (id: string) => void;
 };
+
 
 export function SidebarContent({
   businesses,
@@ -56,6 +66,12 @@ export function SidebarContent({
   dragHandlers,
   projectFilterName,
   onClearProjectFilter,
+  events,
+  eventsLoading,
+  eventsError,
+  selectedDay,
+  onSelectDay,
+  onSelectProject,
 }: Props) {
   const selected = selectedId
     ? businesses.find((b) => b.id === selectedId) ?? null
@@ -69,12 +85,17 @@ export function SidebarContent({
   })();
 
   const [serviceFormOpen, setServiceFormOpen] = useState(false);
+  const [eventFormOpen, setEventFormOpen] = useState(false);
   useEffect(() => {
     if (tab !== "services") setServiceFormOpen(false);
+    if (tab !== "calendar") setEventFormOpen(false);
   }, [tab]);
   const showServiceForm = tab === "services" && serviceFormOpen && !selected;
+  const showEventForm = tab === "calendar" && eventFormOpen && !selected;
+  const isCalendar = tab === "calendar" && !selected;
 
   const stopDrag = (e: React.SyntheticEvent) => e.stopPropagation();
+
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -109,7 +130,7 @@ export function SidebarContent({
       </div>
 
       {/* Search + pills (hidden on detail) */}
-      {!selected && !showServiceForm && (
+      {!selected && !showServiceForm && !isCalendar && (
         <div className="space-y-3 px-3 pb-3">
           <div
             {...(dragHandlers ?? {})}
@@ -141,7 +162,38 @@ export function SidebarContent({
           {{
             list: showServiceForm ? (
               <ServiceSignupForm onBack={() => setServiceFormOpen(false)} />
+            ) : showEventForm ? (
+              <EventProposalForm
+                onBack={() => setEventFormOpen(false)}
+                venues={businesses.filter((b) => b.category !== "project")}
+                projects={businesses.filter((b) => b.category === "project")}
+              />
+            ) : isCalendar ? (
+              <div className="thin-scroll h-full overflow-y-auto">
+                <div className="mx-2.5 mb-2 flex items-center gap-2 rounded-xl bg-white/[0.04] px-2.5 py-2.5">
+                  <span className="min-w-0 flex-1 text-[11.5px] leading-snug text-white/55">
+                    Something happening in the neighbourhood?
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setEventFormOpen(true)}
+                    className="shrink-0 rounded-full bg-white/[0.1] px-2.5 py-1 text-[11.5px] font-medium text-foreground transition-colors hover:bg-white/[0.18]"
+                  >
+                    Propose an event
+                  </button>
+                </div>
+                <CalendarPanel
+                  events={events}
+                  loading={eventsLoading}
+                  error={eventsError}
+                  selectedDay={selectedDay}
+                  onSelectDay={onSelectDay}
+                  onSelectVenue={onSelect}
+                  onSelectProject={onSelectProject}
+                />
+              </div>
             ) : (
+
               <div className="thin-scroll h-full overflow-y-auto pb-2">
                 {error ? (
                   <div className="px-4 py-8 text-center text-[13px] text-muted-foreground">
@@ -204,7 +256,10 @@ export function SidebarContent({
               [
                 { id: "directory", label: "Directory" },
                 { id: "services", label: "Services" },
+                { id: "calendar", label: "Calendar" },
               ] as { id: Tab; label: string }[]
+
+
             ).map((t) => {
               const active = tab === t.id;
               return (

@@ -7,6 +7,7 @@ import { DIRECTORY_CATEGORIES, SidebarContent, type Tab } from "../components/ma
 import type { CategoryId } from "../data/businesses";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { buildAdjacency, useBusinesses } from "../lib/data";
+import { eventsOnDay, todayInToronto, useEvents } from "../lib/events";
 
 export const Route = createFileRoute("/map")({
   component: MapPage,
@@ -28,12 +29,19 @@ export const Route = createFileRoute("/map")({
 const EMPTY_MESSAGES: Record<Tab, string> = {
   directory: "No places match your search.",
   services: "No services listed yet.",
+  calendar: "Nothing on this day.",
 };
 
 function MapPage() {
   const { select } = Route.useSearch();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { items, loading, error, refresh } = useBusinesses();
+  const {
+    events,
+    loading: eventsLoading,
+    error: eventsError,
+  } = useEvents();
+  const [selectedDay, setSelectedDay] = useState(() => todayInToronto());
   const [query, setQuery] = useState("");
   const [activeCategories, setActiveCategories] = useState<Set<CategoryId>>(
     () => new Set(),
@@ -149,7 +157,25 @@ function MapPage() {
     });
   };
 
+  const handleSelectProjectFromCalendar = (id: string) => {
+    setActiveCategories(new Set());
+    setSelectedId(null);
+    setTab("directory");
+    setExpandedProjectId(id);
+  };
+
+  // locationId -> number of occurrences on the selected day
+  const eventCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const e of eventsOnDay(events, selectedDay)) {
+      if (!e.locationId) continue;
+      counts[e.locationId] = (counts[e.locationId] ?? 0) + 1;
+    }
+    return counts;
+  }, [events, selectedDay]);
+
   const renderSidebar = (dragHandlers?: import("../components/map/BottomSheet").SheetDragHandlers) => (
+
     <SidebarContent
       businesses={items}
       filtered={filtered}
@@ -173,7 +199,14 @@ function MapPage() {
       dragHandlers={dragHandlers}
       projectFilterName={expandedProject?.name ?? null}
       onClearProjectFilter={() => setExpandedProjectId(null)}
+      events={events}
+      eventsLoading={eventsLoading}
+      eventsError={eventsError}
+      selectedDay={selectedDay}
+      onSelectDay={setSelectedDay}
+      onSelectProject={handleSelectProjectFromCalendar}
     />
+
   );
 
   return (
@@ -183,6 +216,7 @@ function MapPage() {
         selectedId={selectedId}
         neighbourIds={neighbourIds}
         filteredIds={filtered.map((b) => b.id)}
+        eventCounts={eventCounts}
         onSelect={(id) => handleSelect(id)}
         isDesktop={isDesktop}
         insets={mapInsets}

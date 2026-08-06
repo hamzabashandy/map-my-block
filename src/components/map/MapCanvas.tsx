@@ -6,6 +6,7 @@ import { CATEGORIES, type Business } from "../../data/businesses";
 import { createMap, morphProgress } from "../../lib/map";
 import { loadConfig } from "../../lib/runtime-config";
 
+import { EVENT_ACCENT } from "../../lib/events";
 import { getStatus } from "../../lib/hours";
 import { STATUS_COLORS } from "./StatusPill";
 
@@ -14,6 +15,8 @@ type Props = {
   selectedId: string | null;
   neighbourIds?: string[];
   filteredIds?: string[] | null;
+  /** Business id -> number of event occurrences on the selected calendar day. */
+  eventCounts?: Record<string, number>;
   onSelect: (id: string) => void;
   isDesktop: boolean;
   /** Live pixel sizes of the floating chrome overlaying the map. */
@@ -34,6 +37,7 @@ export function MapCanvas({
   selectedId,
   neighbourIds,
   filteredIds,
+  eventCounts,
   onSelect,
   isDesktop,
   insets,
@@ -54,6 +58,9 @@ export function MapCanvas({
   onMapReadyRef.current = onMapReady;
   const filteredRef = useRef<Set<string> | null>(null);
   filteredRef.current = filteredIds ? new Set(filteredIds) : null;
+  const eventCountsRef = useRef<Record<string, number>>({});
+  eventCountsRef.current = eventCounts ?? {};
+  const eventCountsKey = JSON.stringify(eventCounts ?? {});
   const neighbourKey = (neighbourIds ?? []).join(",");
   const filteredKey = (filteredIds ?? []).join(",");
   const didInitialFitRef = useRef(false);
@@ -283,6 +290,13 @@ export function MapCanvas({
     });
   }, [selectedId, neighbourKey]);
 
+  // Repaint badges when the selected calendar day changes
+  useEffect(() => {
+    if (!mapRef.current) return;
+    updateMarkers();
+  }, [eventCountsKey]);
+
+
   function updateMarkers() {
     const map = mapRef.current;
     if (!map) return;
@@ -337,6 +351,7 @@ export function MapCanvas({
 
     for (const { entry } of entries) {
       const id = entry.business.id;
+      paintEventBadge(entry, eventCountsRef.current[id] ?? 0);
       if (filteredSet && !filteredSet.has(id) && selId !== id) {
         const localT0 = morphOk.has(id) ? t : 0;
         paintMarker(entry, localT0, "faded", null);
@@ -355,6 +370,7 @@ export function MapCanvas({
       paintMarker(entry, localT, state, accent);
     }
   }
+
 
   if (visibleError) {
     return (
@@ -380,6 +396,45 @@ export function MapCanvas({
 }
 
 type MarkerState = "normal" | "selected" | "neighbour" | "dim" | "faded";
+
+/**
+ * Event badge lives on the marker's outer element so it keeps full opacity
+ * even when the pin itself is dimmed.
+ */
+function paintEventBadge(entry: MarkerEntry, count: number) {
+  const existing = entry.el.querySelector<HTMLSpanElement>("[data-event-badge]");
+  if (count <= 0) {
+    existing?.remove();
+    return;
+  }
+  const badge = existing ?? document.createElement("span");
+  if (!existing) {
+    badge.setAttribute("data-event-badge", "");
+    entry.el.appendChild(badge);
+  }
+  const wide = count > 1;
+  badge.textContent = wide ? String(count) : "";
+  badge.style.cssText = `
+    position: absolute;
+    left: 9px;
+    top: -13px;
+    min-width: ${wide ? 15 : 9}px;
+    height: ${wide ? 15 : 9}px;
+    padding: 0 ${wide ? 3 : 0}px;
+    border-radius: 999px;
+    background: ${EVENT_ACCENT};
+    color: #14100f;
+    font-size: 9.5px;
+    font-weight: 700;
+    line-height: ${wide ? 15 : 9}px;
+    text-align: center;
+    box-shadow: 0 0 0 2px rgba(20,20,22,0.92);
+    pointer-events: none;
+    opacity: 1;
+    z-index: 30;
+  `;
+}
+
 
 function paintMarker(
   entry: MarkerEntry,
