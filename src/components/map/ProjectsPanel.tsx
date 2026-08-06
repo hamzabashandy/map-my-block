@@ -87,7 +87,9 @@ export function ProjectsPanel({
           {...stopMapEvents}
           className="pointer-events-auto absolute flex max-w-[220px] items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-xs text-white/80 backdrop-blur-xl"
           style={{
-            right: INSET,
+            ...(isDesktop
+              ? { right: INSET }
+              : { left: "50%", transform: "translateX(-50%)" }),
             top: INSET,
             zIndex: 2,
             backgroundColor: "rgba(20,20,22,0.85)",
