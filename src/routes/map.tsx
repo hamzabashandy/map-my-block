@@ -216,6 +216,7 @@ function MapPage() {
         selectedId={selectedId}
         neighbourIds={neighbourIds}
         filteredIds={filtered.map((b) => b.id)}
+        eventCounts={eventCounts}
         onSelect={(id) => handleSelect(id)}
         isDesktop={isDesktop}
         insets={mapInsets}
