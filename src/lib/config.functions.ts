@@ -5,6 +5,7 @@ export const getPublicConfig = createServerFn({ method: "GET" }).handler(
     return {
       mapboxToken: process.env.MAPBOX_TOKEN ?? "",
       sheetCsvUrl: process.env.SHEET_CSV_URL ?? "",
+      eventsCsvUrl: process.env.EVENTS_CSV_URL ?? "",
     };
   },
 );
