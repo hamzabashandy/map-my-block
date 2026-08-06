@@ -228,6 +228,8 @@ function MapPage() {
         onToggleExpand={handleToggleProject}
         isDesktop={isDesktop}
         onHeightChange={handlePanelHeight}
+        open={panelOpen}
+        onOpenChange={setPanelOpen}
       />
 
       {isDesktop ? (
@@ -248,6 +250,7 @@ function MapPage() {
           onSnapChange={setSnap}
           onHeightChange={handleSheetHeight}
           reservedTop={panelHeight}
+          onTallSheet={() => setPanelOpen(false)}
         >
           {(handlers) => renderSidebar(handlers)}
         </BottomSheet>
