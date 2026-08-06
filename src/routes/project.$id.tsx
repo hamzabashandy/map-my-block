@@ -29,7 +29,7 @@ export const Route = createFileRoute("/project/$id")({
 function BackControl() {
   return (
     <Link
-      to="/"
+      to="/map"
       className="inline-flex items-center gap-2 text-[13px] text-white/55 transition-colors hover:text-white/90"
     >
       <ArrowLeft size={14} />
