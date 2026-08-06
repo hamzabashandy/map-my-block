@@ -152,26 +152,28 @@ export function shortDate(date: string): string {
 }
 
 /** "1 event today", "2 events in 3 days", "1 event on 4 Aug", … */
+export function relativeDayPhrase(date: string, now: Date = new Date()): string {
+  const delta = calendarDayDelta(date, now);
+  return delta === 0
+    ? "today"
+    : delta === 1
+      ? "tomorrow"
+      : delta === -1
+        ? "yesterday"
+        : delta > 1 && delta <= 6
+          ? `in ${delta} days`
+          : delta < -1 && delta >= -6
+            ? `${Math.abs(delta)} days ago`
+            : `on ${shortDate(date)}`;
+}
+
 export function eventCountLabel(
   count: number,
   date: string,
   now: Date = new Date(),
 ): string {
   const noun = count === 1 ? "event" : "events";
-  const delta = calendarDayDelta(date, now);
-  const when =
-    delta === 0
-      ? "today"
-      : delta === 1
-        ? "tomorrow"
-        : delta === -1
-          ? "yesterday"
-          : delta > 1 && delta <= 6
-            ? `in ${delta} days`
-            : delta < -1 && delta >= -6
-              ? `${Math.abs(delta)} days ago`
-              : `on ${shortDate(date)}`;
-  return `${count} ${noun} ${when}`;
+  return `${count} ${noun} ${relativeDayPhrase(date, now)}`;
 }
 
 /** Weekday (0=Sun) of a YYYY-MM-DD calendar date, timezone-independent. */
@@ -282,6 +284,97 @@ export function daysWithEvents(
   for (const e of events)
     for (const d of occurrencesInMonth(e, year, month)) out.add(d);
   return out;
+}
+
+export type Occurrence = { event: Event; date: string };
+
+/**
+ * Next `limit` occurrences from today (America/Toronto) onwards, in date order.
+ * Walks forward month by month, up to twelve months ahead.
+ */
+export function upcomingOccurrences(
+  events: Event[],
+  opts: {
+    locationId?: string;
+    projectId?: string;
+    limit?: number;
+    now?: Date;
+  } = {},
+): Occurrence[] {
+  const { locationId, projectId, limit = 3, now = new Date() } = opts;
+  const pool = events.filter((e) =>
+    locationId
+      ? e.locationId === locationId
+      : projectId
+        ? e.projectId === projectId
+        : true,
+  );
+  if (pool.length === 0) return [];
+
+  const today = todayInToronto(now);
+  let year = Number(today.slice(0, 4));
+  let month = Number(today.slice(5, 7)) - 1;
+  const out: Occurrence[] = [];
+
+  for (let i = 0; i < 12 && out.length < limit; i += 1) {
+    const monthly: Occurrence[] = [];
+    for (const event of pool)
+      for (const date of occurrencesInMonth(event, year, month))
+        if (date >= today) monthly.push({ event, date });
+    monthly.sort(
+      (a, b) =>
+        a.date.localeCompare(b.date) ||
+        (a.event.startTime ?? "").localeCompare(b.event.startTime ?? ""),
+    );
+    out.push(...monthly);
+    month += 1;
+    if (month > 11) {
+      month = 0;
+      year += 1;
+    }
+  }
+
+  return out.slice(0, limit);
+}
+
+/** How many upcoming occurrences exist, capped for cheap "more than N" checks. */
+export function countUpcoming(
+  events: Event[],
+  opts: { locationId?: string; projectId?: string; cap?: number; now?: Date } = {},
+): number {
+  const { cap = 4, ...rest } = opts;
+  return upcomingOccurrences(events, { ...rest, limit: cap }).length;
+}
+
+const WEEKDAY_LABELS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+/** "Every Wednesday", "Second Saturday monthly", … or null for one-offs. */
+export function recurrenceLabel(event: Event): string | null {
+  const dow = weekdayIndex(event.dayOfWeek);
+  const day = dow === null ? null : WEEKDAY_LABELS[dow];
+  switch (event.frequency) {
+    case "weekly":
+      return day ? `Every ${day}` : "Weekly";
+    case "biweekly":
+      return day ? `Every other ${day}` : "Every two weeks";
+    case "monthly": {
+      const week = event.weekOfMonth ?? "first";
+      const cap = week.charAt(0).toUpperCase() + week.slice(1);
+      return day ? `${cap} ${day} monthly` : "Monthly";
+    }
+    case "annual":
+      return "Once a year";
+    default:
+      return null;
+  }
 }
 
 export function formatEventTime(event: Event): string {

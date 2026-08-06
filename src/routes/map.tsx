@@ -158,6 +158,22 @@ function MapPage() {
     });
   };
 
+  const [focusEventId, setFocusEventId] = useState<string | null>(null);
+
+  const handleOpenEvent = (date: string, eventId: string) => {
+    setSelectedId(null);
+    setSelectedDay(date);
+    setFocusEventId(eventId);
+    setTab("calendar");
+  };
+
+  const handleSeeAllEvents = (date: string) => {
+    setSelectedId(null);
+    setSelectedDay(date);
+    setFocusEventId(null);
+    setTab("calendar");
+  };
+
   const handleSelectProjectFromCalendar = (id: string) => {
     setActiveCategories(new Set());
     setSelectedId(null);
@@ -205,6 +221,9 @@ function MapPage() {
       eventsError={eventsError}
       selectedDay={selectedDay}
       onSelectDay={setSelectedDay}
+      focusEventId={focusEventId}
+      onOpenEvent={handleOpenEvent}
+      onSeeAllEvents={handleSeeAllEvents}
       onSelectProject={handleSelectProjectFromCalendar}
     />
 

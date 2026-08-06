@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   EVENT_ACCENT,
   daysInMonth,
@@ -42,6 +42,7 @@ export function CalendarPanel({
   onSelectDay,
   onSelectVenue,
   onSelectProject,
+  focusEventId,
 }: {
   events: Event[];
   loading: boolean;
@@ -50,11 +51,21 @@ export function CalendarPanel({
   onSelectDay: (date: string) => void;
   onSelectVenue: (id: string) => void;
   onSelectProject: (id: string) => void;
+  focusEventId?: string | null;
 }) {
   const today = todayInToronto();
   const [year, setYear] = useState(() => Number(selectedDay.slice(0, 4)));
   const [month, setMonth] = useState(() => Number(selectedDay.slice(5, 7)) - 1);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Follow externally-driven day changes (e.g. "Events here" rows).
+  useEffect(() => {
+    setYear(Number(selectedDay.slice(0, 4)));
+    setMonth(Number(selectedDay.slice(5, 7)) - 1);
+  }, [selectedDay]);
+  useEffect(() => {
+    if (focusEventId) setExpandedId(focusEventId);
+  }, [focusEventId]);
 
   const total = daysInMonth(year, month);
   const marked = useMemo(
