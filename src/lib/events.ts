@@ -129,6 +129,51 @@ export function ymd(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
+/** Midnight-UTC timestamp for a YYYY-MM-DD calendar date (day arithmetic only). */
+function dayStamp(date: string): number {
+  const [y, m, d] = date.split("-").map(Number);
+  return Date.UTC(y, m - 1, d);
+}
+
+/** Whole calendar days from today (America/Toronto) to `date`. */
+export function calendarDayDelta(date: string, now: Date = new Date()): number {
+  const diff = dayStamp(date) - dayStamp(todayInToronto(now));
+  return Math.round(diff / 86_400_000);
+}
+
+/** "14 Sep" for a YYYY-MM-DD calendar date. */
+export function shortDate(date: string): string {
+  const [y, m, d] = date.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "UTC",
+    day: "numeric",
+    month: "short",
+  }).format(new Date(Date.UTC(y, m - 1, d)));
+}
+
+/** "1 event today", "2 events in 3 days", "1 event on 4 Aug", … */
+export function eventCountLabel(
+  count: number,
+  date: string,
+  now: Date = new Date(),
+): string {
+  const noun = count === 1 ? "event" : "events";
+  const delta = calendarDayDelta(date, now);
+  const when =
+    delta === 0
+      ? "today"
+      : delta === 1
+        ? "tomorrow"
+        : delta === -1
+          ? "yesterday"
+          : delta > 1 && delta <= 6
+            ? `in ${delta} days`
+            : delta < -1 && delta >= -6
+              ? `${Math.abs(delta)} days ago`
+              : `on ${shortDate(date)}`;
+  return `${count} ${noun} ${when}`;
+}
+
 /** Weekday (0=Sun) of a YYYY-MM-DD calendar date, timezone-independent. */
 export function weekdayOf(date: string): number {
   const [y, m, d] = date.split("-").map(Number);
