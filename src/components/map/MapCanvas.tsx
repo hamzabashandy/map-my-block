@@ -6,6 +6,7 @@ import { CATEGORIES, type Business } from "../../data/businesses";
 import { createMap, morphProgress } from "../../lib/map";
 import { loadConfig } from "../../lib/runtime-config";
 
+import { EVENT_ACCENT } from "../../lib/events";
 import { getStatus } from "../../lib/hours";
 import { STATUS_COLORS } from "./StatusPill";
 
