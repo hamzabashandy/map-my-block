@@ -81,6 +81,7 @@ export function BottomSheet({
       viewportHeight() * 0.96,
       Math.max(60, dragState.current.startHeight - dy),
     );
+    if (next > rawViewportHeight() * 0.6) onTallSheet?.();
     setDragHeight(next);
   };
 
@@ -94,6 +95,7 @@ export function BottomSheet({
       const next: SnapIndex = snap === 2 ? 1 : 2;
       setDragHeight(null);
       onUserDrag?.();
+      if (next === 2) onTallSheet?.();
       onSnapChange(next);
       return;
     }
