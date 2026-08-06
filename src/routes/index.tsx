@@ -99,7 +99,7 @@ function Splash() {
           </p>
 
           <Link
-            to="/map"
+            to="/map" search={{ select: undefined }}
             className="group mt-10 inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3.5 text-[15px] font-medium text-background transition-all hover:bg-foreground/90 active:scale-[0.98]"
           >
             Open the map

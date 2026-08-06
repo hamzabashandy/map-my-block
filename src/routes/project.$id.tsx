@@ -29,7 +29,7 @@ export const Route = createFileRoute("/project/$id")({
 function BackControl() {
   return (
     <Link
-      to="/map"
+      to="/map" search={{ select: undefined }}
       className="inline-flex items-center gap-2 text-[13px] text-white/55 transition-colors hover:text-white/90"
     >
       <ArrowLeft size={14} />
@@ -110,7 +110,7 @@ function ProjectPage() {
           {neighbours.map((n) => (
             <Link
               key={n.id}
-              to="/map"
+              to="/map" search={{ select: undefined }}
               search={{ select: n.id }}
               className="flex w-full items-start gap-3 px-3 py-3 text-left transition-colors hover:bg-white/[0.05]"
             >
