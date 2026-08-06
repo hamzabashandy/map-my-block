@@ -14,6 +14,8 @@ type Props = {
   selectedId: string | null;
   neighbourIds?: string[];
   filteredIds?: string[] | null;
+  /** Business id -> number of event occurrences on the selected calendar day. */
+  eventCounts?: Record<string, number>;
   onSelect: (id: string) => void;
   isDesktop: boolean;
   /** Live pixel sizes of the floating chrome overlaying the map. */
