@@ -23,6 +23,7 @@ export function BottomSheet({
   onUserDrag,
   onHeightChange,
   reservedTop = 0,
+  onTallSheet,
 }: {
   children: (handlers: SheetDragHandlers) => React.ReactNode;
   snap: SnapIndex;
@@ -32,6 +33,8 @@ export function BottomSheet({
   onHeightChange?: (height: number) => void;
   /** Space at the top of the viewport the sheet must never grow into. */
   reservedTop?: number;
+  /** Fired when the sheet grows tall enough to compete with the projects panel. */
+  onTallSheet?: () => void;
 }) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{
