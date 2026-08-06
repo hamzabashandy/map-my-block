@@ -152,26 +152,28 @@ export function shortDate(date: string): string {
 }
 
 /** "1 event today", "2 events in 3 days", "1 event on 4 Aug", … */
+export function relativeDayPhrase(date: string, now: Date = new Date()): string {
+  const delta = calendarDayDelta(date, now);
+  return delta === 0
+    ? "today"
+    : delta === 1
+      ? "tomorrow"
+      : delta === -1
+        ? "yesterday"
+        : delta > 1 && delta <= 6
+          ? `in ${delta} days`
+          : delta < -1 && delta >= -6
+            ? `${Math.abs(delta)} days ago`
+            : `on ${shortDate(date)}`;
+}
+
 export function eventCountLabel(
   count: number,
   date: string,
   now: Date = new Date(),
 ): string {
   const noun = count === 1 ? "event" : "events";
-  const delta = calendarDayDelta(date, now);
-  const when =
-    delta === 0
-      ? "today"
-      : delta === 1
-        ? "tomorrow"
-        : delta === -1
-          ? "yesterday"
-          : delta > 1 && delta <= 6
-            ? `in ${delta} days`
-            : delta < -1 && delta >= -6
-              ? `${Math.abs(delta)} days ago`
-              : `on ${shortDate(date)}`;
-  return `${count} ${noun} ${when}`;
+  return `${count} ${noun} ${relativeDayPhrase(date, now)}`;
 }
 
 /** Weekday (0=Sun) of a YYYY-MM-DD calendar date, timezone-independent. */
