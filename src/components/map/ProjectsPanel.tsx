@@ -100,6 +100,7 @@ export function ProjectsPanel({
         </button>
       ) : (
         <div
+          ref={cardRef}
           {...stopMapEvents}
           className="pointer-events-auto absolute flex max-h-[60%] flex-col overflow-hidden rounded-2xl border border-white/[0.06] backdrop-blur-xl"
           style={{
