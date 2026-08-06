@@ -199,7 +199,14 @@ function MapPage() {
       dragHandlers={dragHandlers}
       projectFilterName={expandedProject?.name ?? null}
       onClearProjectFilter={() => setExpandedProjectId(null)}
+      events={events}
+      eventsLoading={eventsLoading}
+      eventsError={eventsError}
+      selectedDay={selectedDay}
+      onSelectDay={setSelectedDay}
+      onSelectProject={handleSelectProjectFromCalendar}
     />
+
   );
 
   return (
