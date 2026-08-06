@@ -66,6 +66,12 @@ export function SidebarContent({
   dragHandlers,
   projectFilterName,
   onClearProjectFilter,
+  events,
+  eventsLoading,
+  eventsError,
+  selectedDay,
+  onSelectDay,
+  onSelectProject,
 }: Props) {
   const selected = selectedId
     ? businesses.find((b) => b.id === selectedId) ?? null
@@ -79,12 +85,17 @@ export function SidebarContent({
   })();
 
   const [serviceFormOpen, setServiceFormOpen] = useState(false);
+  const [eventFormOpen, setEventFormOpen] = useState(false);
   useEffect(() => {
     if (tab !== "services") setServiceFormOpen(false);
+    if (tab !== "calendar") setEventFormOpen(false);
   }, [tab]);
   const showServiceForm = tab === "services" && serviceFormOpen && !selected;
+  const showEventForm = tab === "calendar" && eventFormOpen && !selected;
+  const isCalendar = tab === "calendar" && !selected;
 
   const stopDrag = (e: React.SyntheticEvent) => e.stopPropagation();
+
 
   return (
     <div className="flex h-full min-h-0 flex-col">
