@@ -36,6 +36,7 @@ export function MapCanvas({
   selectedId,
   neighbourIds,
   filteredIds,
+  eventCounts,
   onSelect,
   isDesktop,
   insets,
