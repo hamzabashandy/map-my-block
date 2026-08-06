@@ -87,6 +87,7 @@ export function BottomSheet({
       // Tap — toggle between expanded/half
       const next: SnapIndex = snap === 2 ? 1 : 2;
       setDragHeight(null);
+      onUserDrag?.();
       onSnapChange(next);
       return;
     }
@@ -102,6 +103,7 @@ export function BottomSheet({
       }
     });
     setDragHeight(null);
+    onUserDrag?.();
     onSnapChange(nearest);
   };
 
