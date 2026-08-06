@@ -351,10 +351,10 @@ export function MapCanvas({
 
     for (const { entry } of entries) {
       const id = entry.business.id;
-      paintEventBadge(entry, eventCountsRef.current[id] ?? 0);
+      const count = eventCountsRef.current[id] ?? 0;
       if (filteredSet && !filteredSet.has(id) && selId !== id) {
         const localT0 = morphOk.has(id) ? t : 0;
-        paintMarker(entry, localT0, "faded", null);
+        paintMarker(entry, localT0, "faded", null, count);
         continue;
       }
       const isSelected = selId === id;
@@ -367,7 +367,7 @@ export function MapCanvas({
             ? "neighbour"
             : "dim";
       const localT = morphOk.has(id) ? t : 0;
-      paintMarker(entry, localT, state, accent);
+      paintMarker(entry, localT, state, accent, count);
     }
   }
 
@@ -398,26 +398,32 @@ export function MapCanvas({
 type MarkerState = "normal" | "selected" | "neighbour" | "dim" | "faded";
 
 /**
- * Event badge lives on the marker's outer element so it keeps full opacity
- * even when the pin itself is dimmed.
+ * Corner badge lives on the marker's own box (entry.inner) so it tracks the
+ * marker's bounding box through the morph. Only shown in the collapsed state.
  */
-function paintEventBadge(entry: MarkerEntry, count: number) {
-  const existing = entry.el.querySelector<HTMLSpanElement>("[data-event-badge]");
-  if (count <= 0) {
+function paintEventBadge(
+  entry: MarkerEntry,
+  count: number,
+  expanded: boolean,
+  bg: string,
+) {
+  const existing = entry.inner.querySelector<HTMLSpanElement>("[data-event-badge]");
+  entry.el.querySelector("[data-event-badge]")?.remove();
+  if (count <= 0 || expanded) {
     existing?.remove();
     return;
   }
   const badge = existing ?? document.createElement("span");
   if (!existing) {
     badge.setAttribute("data-event-badge", "");
-    entry.el.appendChild(badge);
+    entry.inner.appendChild(badge);
   }
   const wide = count > 1;
   badge.textContent = wide ? String(count) : "";
   badge.style.cssText = `
     position: absolute;
-    left: 9px;
-    top: -13px;
+    top: -4px;
+    right: -4px;
     min-width: ${wide ? 15 : 9}px;
     height: ${wide ? 15 : 9}px;
     padding: 0 ${wide ? 3 : 0}px;
@@ -428,10 +434,11 @@ function paintEventBadge(entry: MarkerEntry, count: number) {
     font-weight: 700;
     line-height: ${wide ? 15 : 9}px;
     text-align: center;
-    box-shadow: 0 0 0 2px rgba(20,20,22,0.92);
+    box-shadow: 0 0 0 2px ${bg};
     pointer-events: none;
     opacity: 1;
     z-index: 30;
+    transition: all 200ms ease;
   `;
 }
 
@@ -441,6 +448,7 @@ function paintMarker(
   t: number,
   state: MarkerState,
   accent: string | null,
+  eventCount = 0,
 ) {
   const cat = CATEGORIES[entry.business.category];
   const selected = state === "selected";
@@ -481,17 +489,21 @@ function paintMarker(
     cursor: pointer;
     display: flex;
     align-items: center;
-    overflow: hidden;
+    overflow: visible;
     backdrop-filter: blur(6px);
     color: white;
     z-index: ${selected ? 20 : state === "neighbour" ? 10 : 1};
   `;
+
+  const bg = t > 0.5 ? "rgba(20,20,22,0.94)" : darken(cat.color);
+  paintEventBadge(entry, eventCount, t > 0.5, bg);
 
   entry.root.render(
     <MarkerContent
       business={entry.business}
       t={t}
       textOpacity={textOpacity}
+      eventCount={eventCount}
     />,
   );
 }
@@ -505,10 +517,12 @@ function MarkerContent({
   business,
   t,
   textOpacity,
+  eventCount = 0,
 }: {
   business: Business;
   t: number;
   textOpacity: number;
+  eventCount?: number;
 }) {
   const cat = CATEGORIES[business.category];
   const Icon = cat.icon;
@@ -575,9 +589,37 @@ function MarkerContent({
               overflow: "hidden",
               textOverflow: "ellipsis",
               marginTop: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
             }}
           >
-            {cat.label}
+            <span
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {cat.label}
+            </span>
+            {t > 0.5 && eventCount > 0 && (
+              <span
+                style={{
+                  flexShrink: 0,
+                  background: EVENT_ACCENT,
+                  color: "#14100f",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  lineHeight: "14px",
+                  padding: "0 6px",
+                  borderRadius: 999,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {eventCount === 1 ? "1 event today" : `${eventCount} events today`}
+              </span>
+            )}
           </span>
         </span>
       )}
