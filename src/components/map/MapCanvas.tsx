@@ -6,7 +6,7 @@ import { CATEGORIES, type Business } from "../../data/businesses";
 import { createMap, morphProgress } from "../../lib/map";
 import { loadConfig } from "../../lib/runtime-config";
 
-import { EVENT_ACCENT } from "../../lib/events";
+import { EVENT_ACCENT, eventCountLabel, todayInToronto } from "../../lib/events";
 import { getStatus } from "../../lib/hours";
 import { STATUS_COLORS } from "./StatusPill";
 
@@ -17,6 +17,8 @@ type Props = {
   filteredIds?: string[] | null;
   /** Business id -> number of event occurrences on the selected calendar day. */
   eventCounts?: Record<string, number>;
+  /** Calendar day (YYYY-MM-DD) the counts refer to. */
+  selectedDay?: string;
   onSelect: (id: string) => void;
   isDesktop: boolean;
   /** Live pixel sizes of the floating chrome overlaying the map. */
@@ -38,6 +40,7 @@ export function MapCanvas({
   neighbourIds,
   filteredIds,
   eventCounts,
+  selectedDay,
   onSelect,
   isDesktop,
   insets,
@@ -61,6 +64,8 @@ export function MapCanvas({
   const eventCountsRef = useRef<Record<string, number>>({});
   eventCountsRef.current = eventCounts ?? {};
   const eventCountsKey = JSON.stringify(eventCounts ?? {});
+  const selectedDayRef = useRef<string | undefined>(selectedDay);
+  selectedDayRef.current = selectedDay;
   const neighbourKey = (neighbourIds ?? []).join(",");
   const filteredKey = (filteredIds ?? []).join(",");
   const didInitialFitRef = useRef(false);
@@ -294,7 +299,7 @@ export function MapCanvas({
   useEffect(() => {
     if (!mapRef.current) return;
     updateMarkers();
-  }, [eventCountsKey]);
+  }, [eventCountsKey, selectedDay]);
 
 
   function updateMarkers() {
@@ -354,7 +359,7 @@ export function MapCanvas({
       const count = eventCountsRef.current[id] ?? 0;
       if (filteredSet && !filteredSet.has(id) && selId !== id) {
         const localT0 = morphOk.has(id) ? t : 0;
-        paintMarker(entry, localT0, "faded", null, count);
+        paintMarker(entry, localT0, "faded", null, count, selectedDayRef.current);
         continue;
       }
       const isSelected = selId === id;
@@ -367,7 +372,7 @@ export function MapCanvas({
             ? "neighbour"
             : "dim";
       const localT = morphOk.has(id) ? t : 0;
-      paintMarker(entry, localT, state, accent, count);
+      paintMarker(entry, localT, state, accent, count, selectedDayRef.current);
     }
   }
 
@@ -449,6 +454,7 @@ function paintMarker(
   state: MarkerState,
   accent: string | null,
   eventCount = 0,
+  selectedDay?: string,
 ) {
   const cat = CATEGORIES[entry.business.category];
   const selected = state === "selected";
@@ -504,6 +510,7 @@ function paintMarker(
       t={t}
       textOpacity={textOpacity}
       eventCount={eventCount}
+      selectedDay={selectedDay}
     />,
   );
 }
@@ -518,11 +525,13 @@ function MarkerContent({
   t,
   textOpacity,
   eventCount = 0,
+  selectedDay,
 }: {
   business: Business;
   t: number;
   textOpacity: number;
   eventCount?: number;
+  selectedDay?: string;
 }) {
   const cat = CATEGORIES[business.category];
   const Icon = cat.icon;
@@ -617,7 +626,7 @@ function MarkerContent({
                   whiteSpace: "nowrap",
                 }}
               >
-                {eventCount === 1 ? "1 event today" : `${eventCount} events today`}
+                {eventCountLabel(eventCount, selectedDay ?? todayInToronto())}
               </span>
             )}
           </span>
