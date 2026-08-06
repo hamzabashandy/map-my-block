@@ -43,7 +43,19 @@ function MapPage() {
   const [tab, setTab] = useState<Tab>("directory");
   const [snap, setSnap] = useState<0 | 1 | 2>(1);
   const [panelHeight, setPanelHeight] = useState(0);
+  const [sheetHeight, setSheetHeight] = useState(0);
   const handlePanelHeight = useCallback((h: number) => setPanelHeight(h), []);
+  const handleSheetHeight = useCallback((h: number) => setSheetHeight(h), []);
+
+  // Visible map band = viewport minus the floating chrome over it.
+  const mapInsets = useMemo(
+    () =>
+      isDesktop
+        ? { top: 0, bottom: 0, left: 280, right: panelHeight > 0 ? 280 : 0 }
+        : // +60 so a morphed (taller) pin clears the sheet too
+          { top: panelHeight, bottom: sheetHeight > 0 ? sheetHeight + 60 : 0, left: 0, right: 0 },
+    [isDesktop, panelHeight, sheetHeight],
+  );
   const adjacency = useMemo(() => buildAdjacency(items), [items]);
   const neighbourIds = selectedId ? adjacency[selectedId] ?? [] : [];
   const projects = useMemo(
@@ -173,6 +185,7 @@ function MapPage() {
         filteredIds={filtered.map((b) => b.id)}
         onSelect={(id) => handleSelect(id)}
         isDesktop={isDesktop}
+        insets={mapInsets}
       />
 
       <ProjectsPanel
@@ -199,6 +212,7 @@ function MapPage() {
         <BottomSheet
           snap={snap}
           onSnapChange={setSnap}
+          onHeightChange={handleSheetHeight}
           reservedTop={panelHeight}
         >
           {(handlers) => renderSidebar(handlers)}
