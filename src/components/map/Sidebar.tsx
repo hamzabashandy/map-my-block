@@ -130,7 +130,7 @@ export function SidebarContent({
       </div>
 
       {/* Search + pills (hidden on detail) */}
-      {!selected && !showServiceForm && (
+      {!selected && !showServiceForm && !isCalendar && (
         <div className="space-y-3 px-3 pb-3">
           <div
             {...(dragHandlers ?? {})}
