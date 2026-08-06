@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useMemo } from "react";
 import { CATEGORIES, type Business } from "../data/businesses";
+import { EventsHere } from "../components/map/EventsHere";
 import { buildAdjacency, useBusinesses } from "../lib/data";
+import { useEvents } from "../lib/events";
 
 export const Route = createFileRoute("/project/$id")({
   component: ProjectPage,
@@ -54,6 +56,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 function ProjectPage() {
   const { id } = Route.useParams();
   const { items, loading } = useBusinesses();
+  const { events } = useEvents();
   const adjacency = useMemo(() => buildAdjacency(items), [items]);
 
   const project = items.find((b) => b.id === id && b.category === "project");
@@ -96,6 +99,8 @@ function ProjectPage() {
           {project.description_long}
         </p>
       )}
+
+      <EventsHere events={events} projectId={project.id} className="mt-10" />
 
       <section className="mt-10">
         <h2 className="text-[12px] font-medium uppercase tracking-wide text-white/40">
