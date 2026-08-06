@@ -157,7 +157,25 @@ function MapPage() {
     });
   };
 
+  const handleSelectProjectFromCalendar = (id: string) => {
+    setActiveCategories(new Set());
+    setSelectedId(null);
+    setTab("directory");
+    setExpandedProjectId(id);
+  };
+
+  // locationId -> number of occurrences on the selected day
+  const eventCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const e of eventsOnDay(events, selectedDay)) {
+      if (!e.locationId) continue;
+      counts[e.locationId] = (counts[e.locationId] ?? 0) + 1;
+    }
+    return counts;
+  }, [events, selectedDay]);
+
   const renderSidebar = (dragHandlers?: import("../components/map/BottomSheet").SheetDragHandlers) => (
+
     <SidebarContent
       businesses={items}
       filtered={filtered}
