@@ -517,10 +517,12 @@ function MarkerContent({
   business,
   t,
   textOpacity,
+  eventCount = 0,
 }: {
   business: Business;
   t: number;
   textOpacity: number;
+  eventCount?: number;
 }) {
   const cat = CATEGORIES[business.category];
   const Icon = cat.icon;
