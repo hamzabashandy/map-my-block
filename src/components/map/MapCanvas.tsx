@@ -337,6 +337,7 @@ export function MapCanvas({
 
     for (const { entry } of entries) {
       const id = entry.business.id;
+      paintEventBadge(entry, eventCountsRef.current[id] ?? 0);
       if (filteredSet && !filteredSet.has(id) && selId !== id) {
         const localT0 = morphOk.has(id) ? t : 0;
         paintMarker(entry, localT0, "faded", null);
@@ -355,6 +356,7 @@ export function MapCanvas({
       paintMarker(entry, localT, state, accent);
     }
   }
+
 
   if (visibleError) {
     return (
