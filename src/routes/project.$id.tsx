@@ -110,7 +110,7 @@ function ProjectPage() {
           {neighbours.map((n) => (
             <Link
               key={n.id}
-              to="/map" search={{ select: undefined }}
+              to="/map"
               search={{ select: n.id }}
               className="flex w-full items-start gap-3 px-3 py-3 text-left transition-colors hover:bg-white/[0.05]"
             >
