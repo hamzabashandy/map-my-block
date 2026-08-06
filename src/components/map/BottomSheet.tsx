@@ -101,15 +101,18 @@ export function BottomSheet({
     }
 
     const current = dragHeight ?? heightForSnap(snap);
-    let nearest: SnapIndex = 0;
-    let best = Infinity;
-    SNAPS.forEach((frac, i) => {
-      const d = Math.abs(viewportHeight() * frac - current);
-      if (d < best) {
-        best = d;
-        nearest = i as SnapIndex;
-      }
-    });
+    const nearest = ((): SnapIndex => {
+      let idx: SnapIndex = 0;
+      let best = Infinity;
+      SNAPS.forEach((frac, i) => {
+        const d = Math.abs(viewportHeight() * frac - current);
+        if (d < best) {
+          best = d;
+          idx = i as SnapIndex;
+        }
+      });
+      return idx;
+    })();
     setDragHeight(null);
     onUserDrag?.();
     if (nearest === 2) onTallSheet?.();
