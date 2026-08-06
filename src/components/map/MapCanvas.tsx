@@ -398,26 +398,32 @@ export function MapCanvas({
 type MarkerState = "normal" | "selected" | "neighbour" | "dim" | "faded";
 
 /**
- * Event badge lives on the marker's outer element so it keeps full opacity
- * even when the pin itself is dimmed.
+ * Corner badge lives on the marker's own box (entry.inner) so it tracks the
+ * marker's bounding box through the morph. Only shown in the collapsed state.
  */
-function paintEventBadge(entry: MarkerEntry, count: number) {
-  const existing = entry.el.querySelector<HTMLSpanElement>("[data-event-badge]");
-  if (count <= 0) {
+function paintEventBadge(
+  entry: MarkerEntry,
+  count: number,
+  expanded: boolean,
+  bg: string,
+) {
+  const existing = entry.inner.querySelector<HTMLSpanElement>("[data-event-badge]");
+  entry.el.querySelector("[data-event-badge]")?.remove();
+  if (count <= 0 || expanded) {
     existing?.remove();
     return;
   }
   const badge = existing ?? document.createElement("span");
   if (!existing) {
     badge.setAttribute("data-event-badge", "");
-    entry.el.appendChild(badge);
+    entry.inner.appendChild(badge);
   }
   const wide = count > 1;
   badge.textContent = wide ? String(count) : "";
   badge.style.cssText = `
     position: absolute;
-    left: 9px;
-    top: -13px;
+    top: -4px;
+    right: -4px;
     min-width: ${wide ? 15 : 9}px;
     height: ${wide ? 15 : 9}px;
     padding: 0 ${wide ? 3 : 0}px;
@@ -428,10 +434,11 @@ function paintEventBadge(entry: MarkerEntry, count: number) {
     font-weight: 700;
     line-height: ${wide ? 15 : 9}px;
     text-align: center;
-    box-shadow: 0 0 0 2px rgba(20,20,22,0.92);
+    box-shadow: 0 0 0 2px ${bg};
     pointer-events: none;
     opacity: 1;
     z-index: 30;
+    transition: all 200ms ease;
   `;
 }
 
