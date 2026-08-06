@@ -21,12 +21,15 @@ export function BottomSheet({
   snap,
   onSnapChange,
   onUserDrag,
+  onHeightChange,
   reservedTop = 0,
 }: {
   children: (handlers: SheetDragHandlers) => React.ReactNode;
   snap: SnapIndex;
   onSnapChange: (s: SnapIndex) => void;
   onUserDrag?: () => void;
+  /** Reports the sheet's current pixel height so camera moves can pad for it. */
+  onHeightChange?: (height: number) => void;
   /** Space at the top of the viewport the sheet must never grow into. */
   reservedTop?: number;
 }) {
@@ -122,6 +125,11 @@ export function BottomSheet({
   }, []);
 
   const height = dragHeight ?? heightForSnap(snap);
+
+  useEffect(() => {
+    onHeightChange?.(height);
+  }, [height, onHeightChange]);
+  useEffect(() => () => onHeightChange?.(0), [onHeightChange]);
   const isFullyExpanded = snap === 2 && dragHeight == null;
 
   return (
