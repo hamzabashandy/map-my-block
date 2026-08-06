@@ -7,6 +7,7 @@ import { DIRECTORY_CATEGORIES, SidebarContent, type Tab } from "../components/ma
 import type { CategoryId } from "../data/businesses";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { buildAdjacency, useBusinesses } from "../lib/data";
+import { eventsOnDay, todayInToronto, useEvents } from "../lib/events";
 
 export const Route = createFileRoute("/map")({
   component: MapPage,
