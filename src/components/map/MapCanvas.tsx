@@ -16,6 +16,8 @@ type Props = {
   filteredIds?: string[] | null;
   onSelect: (id: string) => void;
   isDesktop: boolean;
+  /** Live pixel sizes of the floating chrome overlaying the map. */
+  insets?: { top?: number; bottom?: number; left?: number; right?: number };
   onMapReady?: (map: mapboxgl.Map | null) => void;
 };
 
@@ -34,6 +36,7 @@ export function MapCanvas({
   filteredIds,
   onSelect,
   isDesktop,
+  insets,
   onMapReady,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -56,6 +59,20 @@ export function MapCanvas({
   const didInitialFitRef = useRef(false);
   const isDesktopRef = useRef(isDesktop);
   isDesktopRef.current = isDesktop;
+  const insetsRef = useRef(insets);
+  insetsRef.current = insets;
+
+  /** Padding for the visible band left over once floating chrome is subtracted. */
+  const cameraPadding = () => {
+    const i = insetsRef.current ?? {};
+    const pad = (v?: number) => (v && v > 0 ? Math.round(v) + 16 : 0);
+    return {
+      top: pad(i.top),
+      bottom: pad(i.bottom),
+      left: pad(i.left),
+      right: pad(i.right),
+    };
+  };
 
   const [token, setToken] = useState<string | null>(null);
   const [visibleError, setVisibleError] = useState<string | null>(null);
@@ -183,11 +200,12 @@ export function MapCanvas({
         const m = mapRef.current;
         if (!m) return;
         const z = m.getZoom();
-        if (z < 17) {
-          m.easeTo({ center: [b.lng, b.lat], zoom: 17.5, duration: 1000 });
-        } else {
-          m.easeTo({ center: [b.lng, b.lat], duration: 600 });
-        }
+        m.easeTo({
+          center: [b.lng, b.lat],
+          zoom: Math.max(z, 17),
+          duration: 600,
+          padding: cameraPadding(),
+        });
         onSelectRef.current(b.id);
       });
 
@@ -215,14 +233,12 @@ export function MapCanvas({
       (b) => set.has(b.id) && b.mapped && b.lng !== undefined && b.lat !== undefined,
     );
     if (matches.length === 0) return;
-    const padding = isDesktopRef.current
-      ? { left: 300, right: 300, top: 80, bottom: 60 }
-      : { left: 32, right: 32, top: 150, bottom: 200 };
+    const padding = cameraPadding();
     if (matches.length === 1) {
       const only = matches[0];
       map.easeTo({
         center: [only.lng!, only.lat!],
-        zoom: Math.min(map.getZoom() < 16 ? 16 : map.getZoom(), 16),
+        zoom: Math.max(map.getZoom(), 17),
         duration: 600,
         padding,
       });
@@ -241,7 +257,12 @@ export function MapCanvas({
     if (!b) return;
 
     if (b.mapped && b.lng !== undefined && b.lat !== undefined) {
-      map.easeTo({ center: [b.lng, b.lat], duration: 600 });
+      map.easeTo({
+        center: [b.lng, b.lat],
+        zoom: Math.max(map.getZoom(), 17),
+        duration: 600,
+        padding: cameraPadding(),
+      });
       return;
     }
 
@@ -256,7 +277,7 @@ export function MapCanvas({
     const bounds = new mapboxgl.LngLatBounds();
     for (const nb of neighbours) bounds.extend([nb.lng!, nb.lat!]);
     map.fitBounds(bounds, {
-      padding: 120,
+      padding: cameraPadding(),
       maxZoom: 17,
       duration: 800,
     });
