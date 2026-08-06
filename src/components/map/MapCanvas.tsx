@@ -367,7 +367,7 @@ export function MapCanvas({
             ? "neighbour"
             : "dim";
       const localT = morphOk.has(id) ? t : 0;
-      paintMarker(entry, localT, state, accent);
+      paintMarker(entry, localT, state, accent, count);
     }
   }
 
