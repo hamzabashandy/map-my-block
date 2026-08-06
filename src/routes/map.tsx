@@ -28,6 +28,7 @@ export const Route = createFileRoute("/map")({
 const EMPTY_MESSAGES: Record<Tab, string> = {
   directory: "No places match your search.",
   services: "No services listed yet.",
+  calendar: "Nothing on this day.",
 };
 
 function MapPage() {
