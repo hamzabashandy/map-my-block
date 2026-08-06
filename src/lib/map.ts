@@ -1,4 +1,8 @@
 import mapboxgl from "mapbox-gl";
+// The inline worker mapbox-gl builds from a Blob fails to parse in the
+// production bundle ("error occurred while parsing the WebWorker bundle"),
+// which leaves the map blank. Hand it a worker Vite compiles itself.
+import MapboxWorker from "mapbox-gl/dist/mapbox-gl-csp-worker?worker";
 
 export const DEFAULT_CENTER: [number, number] = [-75.683846, 45.393636];
 export const DEFAULT_ZOOM = 16;
