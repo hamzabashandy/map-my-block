@@ -35,6 +35,12 @@ function MapPage() {
   const { select } = Route.useSearch();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { items, loading, error, refresh } = useBusinesses();
+  const {
+    events,
+    loading: eventsLoading,
+    error: eventsError,
+  } = useEvents();
+  const [selectedDay, setSelectedDay] = useState(() => todayInToronto());
   const [query, setQuery] = useState("");
   const [activeCategories, setActiveCategories] = useState<Set<CategoryId>>(
     () => new Set(),
