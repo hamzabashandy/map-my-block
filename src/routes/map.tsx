@@ -139,11 +139,6 @@ function MapPage() {
     });
   };
 
-  const highlightIds =
-    projectFilterActive && projectConnectionIds.length > 0
-      ? projectConnectionIds
-      : null;
-
   const renderSidebar = (dragHandlers?: import("../components/map/BottomSheet").SheetDragHandlers) => (
     <SidebarContent
       businesses={items}
@@ -177,7 +172,7 @@ function MapPage() {
         businesses={items}
         selectedId={selectedId}
         neighbourIds={neighbourIds}
-        highlightIds={highlightIds}
+        filteredIds={filtered.map((b) => b.id)}
         onSelect={(id) => handleSelect(id)}
         isDesktop={isDesktop}
       />

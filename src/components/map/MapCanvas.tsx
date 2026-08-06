@@ -13,7 +13,7 @@ type Props = {
   businesses: Business[];
   selectedId: string | null;
   neighbourIds?: string[];
-  highlightIds?: string[] | null;
+  filteredIds?: string[] | null;
   onSelect: (id: string) => void;
   isDesktop: boolean;
   onMapReady?: (map: mapboxgl.Map | null) => void;
@@ -31,7 +31,7 @@ export function MapCanvas({
   businesses,
   selectedId,
   neighbourIds,
-  highlightIds,
+  filteredIds,
   onSelect,
   isDesktop,
   onMapReady,
@@ -49,10 +49,13 @@ export function MapCanvas({
   onSelectRef.current = onSelect;
   const onMapReadyRef = useRef(onMapReady);
   onMapReadyRef.current = onMapReady;
-  const highlightRef = useRef<Set<string> | null>(null);
-  highlightRef.current = highlightIds ? new Set(highlightIds) : null;
+  const filteredRef = useRef<Set<string> | null>(null);
+  filteredRef.current = filteredIds ? new Set(filteredIds) : null;
   const neighbourKey = (neighbourIds ?? []).join(",");
-  const highlightKey = (highlightIds ?? []).join(",");
+  const filteredKey = (filteredIds ?? []).join(",");
+  const didInitialFitRef = useRef(false);
+  const isDesktopRef = useRef(isDesktop);
+  isDesktopRef.current = isDesktop;
 
   const [token, setToken] = useState<string | null>(null);
   const [visibleError, setVisibleError] = useState<string | null>(null);
@@ -197,7 +200,38 @@ export function MapCanvas({
   // Re-render on selection / neighbourhood change
   useEffect(() => {
     updateMarkers();
-  }, [selectedId, neighbourKey, highlightKey]);
+  }, [selectedId, neighbourKey, filteredKey]);
+
+  // Frame the map on the filtered set whenever it changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !filteredIds) return;
+    if (!didInitialFitRef.current) {
+      didInitialFitRef.current = true;
+      return;
+    }
+    const set = new Set(filteredIds);
+    const matches = businessesRef.current.filter(
+      (b) => set.has(b.id) && b.mapped && b.lng !== undefined && b.lat !== undefined,
+    );
+    if (matches.length === 0) return;
+    const padding = isDesktopRef.current
+      ? { left: 300, right: 300, top: 80, bottom: 60 }
+      : { left: 32, right: 32, top: 150, bottom: 200 };
+    if (matches.length === 1) {
+      const only = matches[0];
+      map.easeTo({
+        center: [only.lng!, only.lat!],
+        zoom: Math.min(map.getZoom() < 16 ? 16 : map.getZoom(), 16),
+        duration: 600,
+        padding,
+      });
+      return;
+    }
+    const bounds = new mapboxgl.LngLatBounds();
+    for (const m of matches) bounds.extend([m.lng!, m.lat!]);
+    map.fitBounds(bounds, { padding, maxZoom: 17, duration: 600 });
+  }, [filteredKey, token]);
 
   // Pan to selected (or frame its mapped neighbours when it has no location)
   useEffect(() => {
@@ -278,18 +312,13 @@ export function MapCanvas({
       : undefined;
     const accent = selected ? CATEGORIES[selected.category].color : null;
 
-    const highlight = highlightRef.current;
+    const filteredSet = filteredRef.current;
 
     for (const { entry } of entries) {
       const id = entry.business.id;
-      if (highlight) {
+      if (filteredSet && !filteredSet.has(id) && selId !== id) {
         const localT0 = morphOk.has(id) ? t : 0;
-        paintMarker(
-          entry,
-          localT0,
-          highlight.has(id) ? "normal" : "faded",
-          null,
-        );
+        paintMarker(entry, localT0, "faded", null);
         continue;
       }
       const isSelected = selId === id;
@@ -371,7 +400,7 @@ function paintMarker(
     border: ${border};
     box-shadow: ${shadow};
     transform: scale(${scale});
-    opacity: ${state === "faded" ? 0.12 : state === "dim" ? 0.25 : 1};
+    opacity: ${state === "faded" ? 0.08 : state === "dim" ? 0.25 : 1};
     transition: all 200ms ease, background 300ms ease, opacity 200ms ease;
     cursor: pointer;
     display: flex;
