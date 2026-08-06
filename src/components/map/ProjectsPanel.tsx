@@ -12,6 +12,8 @@ type Props = {
   expandedId: string | null;
   onToggleExpand: (id: string) => void;
   isDesktop: boolean;
+  /** Reports the vertical space the panel occupies from the top of the map (0 when minimized). */
+  onHeightChange?: (height: number) => void;
 };
 
 export function ProjectsPanel({
@@ -19,11 +21,34 @@ export function ProjectsPanel({
   expandedId,
   onToggleExpand,
   isDesktop,
+  onHeightChange,
 }: Props) {
   const [open, setOpen] = useState(true);
+  const cardRef = useRef<HTMLDivElement>(null);
   const expandedProject = expandedId
     ? projects.find((p) => p.id === expandedId) ?? null
     : null;
+
+  // Measure the panel so the bottom sheet can shrink to avoid overlapping it.
+  useLayoutEffect(() => {
+    if (!onHeightChange) return;
+    const el = cardRef.current;
+    if (!open || !el) {
+      onHeightChange(0);
+      return;
+    }
+    const report = () => onHeightChange(INSET + el.getBoundingClientRect().height);
+    report();
+    const ro = new ResizeObserver(report);
+    ro.observe(el);
+    window.addEventListener("resize", report);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", report);
+    };
+  }, [open, onHeightChange, expandedId, projects.length]);
+
+  useEffect(() => () => onHeightChange?.(0), [onHeightChange]);
 
   const stopMapEvents = {
     onPointerDown: (e: React.PointerEvent) => e.stopPropagation(),
@@ -37,10 +62,11 @@ export function ProjectsPanel({
     ? { right: INSET, top: INSET, width: PANEL_WIDTH }
     : {
         top: INSET,
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: `min(${PANEL_WIDTH}px, calc(100% - 32px))`,
+        left: INSET,
+        right: INSET,
+        width: "auto",
       };
+
 
   return (
     <div className="pointer-events-none absolute inset-0 z-10">
