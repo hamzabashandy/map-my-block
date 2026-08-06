@@ -7,7 +7,9 @@ import {
   Phone,
 } from "lucide-react";
 import { CATEGORIES, type Business } from "../../data/businesses";
+import type { Event } from "../../lib/events";
 import { formatHours, hasNoHours, useLiveStatus } from "../../lib/hours";
+import { EventsHere } from "./EventsHere";
 import { StatusPill } from "./StatusPill";
 
 
@@ -16,11 +18,17 @@ export function DetailPanel({
   neighbours = [],
   onSelect,
   onBack,
+  events = [],
+  onOpenEvent,
+  onSeeAllEvents,
 }: {
   business: Business;
   neighbours?: Business[];
   onSelect?: (id: string) => void;
   onBack: () => void;
+  events?: Event[];
+  onOpenEvent?: (date: string, eventId: string) => void;
+  onSeeAllEvents?: (date: string) => void;
 }) {
   const cat = CATEGORIES[business.category];
   const Icon = cat.icon;
@@ -106,6 +114,13 @@ export function DetailPanel({
             {business.description_long}
           </p>
         </div>
+
+        <EventsHere
+          events={events}
+          locationId={business.id}
+          onOpenEvent={onOpenEvent}
+          onSeeAll={onSeeAllEvents}
+        />
 
         {neighbours.length > 0 && (
           <div className="mt-6">

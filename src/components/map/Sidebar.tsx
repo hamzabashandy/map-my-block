@@ -44,6 +44,9 @@ type Props = {
   selectedDay: string;
   onSelectDay: (date: string) => void;
   onSelectProject: (id: string) => void;
+  focusEventId?: string | null;
+  onOpenEvent?: (date: string, eventId: string) => void;
+  onSeeAllEvents?: (date: string) => void;
 };
 
 
@@ -72,6 +75,9 @@ export function SidebarContent({
   selectedDay,
   onSelectDay,
   onSelectProject,
+  focusEventId,
+  onOpenEvent,
+  onSeeAllEvents,
 }: Props) {
   const selected = selectedId
     ? businesses.find((b) => b.id === selectedId) ?? null
@@ -190,6 +196,7 @@ export function SidebarContent({
                   onSelectDay={onSelectDay}
                   onSelectVenue={onSelect}
                   onSelectProject={onSelectProject}
+                  focusEventId={focusEventId}
                 />
               </div>
             ) : (
@@ -242,6 +249,9 @@ export function SidebarContent({
                 neighbours={neighbours}
                 onSelect={(id) => onSelect(id)}
                 onBack={() => onSelect(null)}
+                events={events}
+                onOpenEvent={onOpenEvent}
+                onSeeAllEvents={onSeeAllEvents}
               />
             ) : null,
           }}
