@@ -259,41 +259,41 @@ export function SidebarContent({
       </div>
 
       {/* Tabs */}
-      {!selected && (
-        <div className="border-t border-white/[0.06] px-2 py-1.5">
-          <div className="flex items-center gap-1">
-            {(
-              [
-                { id: "directory", label: "Directory" },
-                { id: "services", label: "Services" },
-                { id: "calendar", label: "Calendar" },
-              ] as { id: Tab; label: string }[]
-
-
-            ).map((t) => {
-              const active = tab === t.id;
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => onTabChange(t.id)}
-                  className="flex-1 rounded-lg py-1.5 text-[12.5px] font-medium transition-colors"
-                  style={{
-                    color: active
-                      ? "var(--foreground)"
-                      : "rgba(255,255,255,0.5)",
-                    backgroundColor: active
-                      ? "rgba(255,255,255,0.06)"
-                      : "transparent",
-                  }}
-                >
-                  {t.label}
-                </button>
-              );
-            })}
-          </div>
+      <div className="border-t border-white/[0.06] px-2 py-1.5">
+        <div className="flex items-center gap-1">
+          {(
+            [
+              { id: "directory", label: "Directory" },
+              { id: "services", label: "Services" },
+              { id: "calendar", label: "Calendar" },
+            ] as { id: Tab; label: string }[]
+          ).map((t) => {
+            const active = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => {
+                  if (selected) onSelect(null);
+                  onTabChange(t.id);
+                }}
+                className="flex-1 rounded-lg py-1.5 text-[12.5px] font-medium transition-colors"
+                style={{
+                  color: active
+                    ? "var(--foreground)"
+                    : "rgba(255,255,255,0.5)",
+                  backgroundColor: active
+                    ? "rgba(255,255,255,0.06)"
+                    : "transparent",
+                }}
+              >
+                {t.label}
+              </button>
+            );
+          })}
         </div>
-      )}
+      </div>
+
     </div>
   );
 }
