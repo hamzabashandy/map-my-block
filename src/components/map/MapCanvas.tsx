@@ -289,6 +289,13 @@ export function MapCanvas({
     });
   }, [selectedId, neighbourKey]);
 
+  // Repaint badges when the selected calendar day changes
+  useEffect(() => {
+    if (!mapRef.current) return;
+    updateMarkers();
+  }, [eventCountsKey]);
+
+
   function updateMarkers() {
     const map = mapRef.current;
     if (!map) return;
