@@ -396,6 +396,45 @@ export function MapCanvas({
 
 type MarkerState = "normal" | "selected" | "neighbour" | "dim" | "faded";
 
+/**
+ * Event badge lives on the marker's outer element so it keeps full opacity
+ * even when the pin itself is dimmed.
+ */
+function paintEventBadge(entry: MarkerEntry, count: number) {
+  const existing = entry.el.querySelector<HTMLSpanElement>("[data-event-badge]");
+  if (count <= 0) {
+    existing?.remove();
+    return;
+  }
+  const badge = existing ?? document.createElement("span");
+  if (!existing) {
+    badge.setAttribute("data-event-badge", "");
+    entry.el.appendChild(badge);
+  }
+  const wide = count > 1;
+  badge.textContent = wide ? String(count) : "";
+  badge.style.cssText = `
+    position: absolute;
+    left: 9px;
+    top: -13px;
+    min-width: ${wide ? 15 : 9}px;
+    height: ${wide ? 15 : 9}px;
+    padding: 0 ${wide ? 3 : 0}px;
+    border-radius: 999px;
+    background: ${EVENT_ACCENT};
+    color: #14100f;
+    font-size: 9.5px;
+    font-weight: 700;
+    line-height: ${wide ? 15 : 9}px;
+    text-align: center;
+    box-shadow: 0 0 0 2px rgba(20,20,22,0.92);
+    pointer-events: none;
+    opacity: 1;
+    z-index: 30;
+  `;
+}
+
+
 function paintMarker(
   entry: MarkerEntry,
   t: number,
