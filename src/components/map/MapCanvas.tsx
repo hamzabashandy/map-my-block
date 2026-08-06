@@ -351,10 +351,10 @@ export function MapCanvas({
 
     for (const { entry } of entries) {
       const id = entry.business.id;
-      paintEventBadge(entry, eventCountsRef.current[id] ?? 0);
+      const count = eventCountsRef.current[id] ?? 0;
       if (filteredSet && !filteredSet.has(id) && selId !== id) {
         const localT0 = morphOk.has(id) ? t : 0;
-        paintMarker(entry, localT0, "faded", null);
+        paintMarker(entry, localT0, "faded", null, count);
         continue;
       }
       const isSelected = selId === id;
