@@ -16,7 +16,9 @@ export function createMap(
   container: HTMLElement,
   token: string,
 ): mapboxgl.Map {
+  (mapboxgl as unknown as { workerClass: unknown }).workerClass = MapboxWorker;
   mapboxgl.accessToken = token;
+
   return new mapboxgl.Map({
     container,
     style: "mapbox://styles/hamzabashandy/cmpggtba2008x01scgc585vii",
