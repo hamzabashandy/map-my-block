@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BottomSheet } from "../components/map/BottomSheet";
 import { MapCanvas } from "../components/map/MapCanvas";
 import { ProjectsPanel } from "../components/map/ProjectsPanel";
@@ -42,6 +42,8 @@ function MapPage() {
   const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("directory");
   const [snap, setSnap] = useState<0 | 1 | 2>(1);
+  const [panelHeight, setPanelHeight] = useState(0);
+  const handlePanelHeight = useCallback((h: number) => setPanelHeight(h), []);
   const adjacency = useMemo(() => buildAdjacency(items), [items]);
   const neighbourIds = selectedId ? adjacency[selectedId] ?? [] : [];
   const projects = useMemo(
@@ -62,7 +64,6 @@ function MapPage() {
     if (!select) return;
     if (!items.some((b) => b.id === select)) return;
     setSelectedId(select);
-    if (!isDesktop) setSnap(2);
   }, [select, items, isDesktop]);
 
   // Escape clears the project filter
@@ -122,8 +123,6 @@ function MapPage() {
 
   const handleSelect = (id: string | null) => {
     setSelectedId(id);
-    if (!id || isDesktop) return;
-    setSnap(2);
   };
 
   const handleToggleProject = (id: string) => {
@@ -133,7 +132,6 @@ function MapPage() {
         setActiveCategories(new Set());
         setSelectedId(null);
         setTab("directory");
-        if (!isDesktop) setSnap(0);
       }
       return next;
     });
@@ -182,6 +180,7 @@ function MapPage() {
         expandedId={expandedProjectId}
         onToggleExpand={handleToggleProject}
         isDesktop={isDesktop}
+        onHeightChange={handlePanelHeight}
       />
 
       {isDesktop ? (
@@ -197,7 +196,11 @@ function MapPage() {
           {renderSidebar()}
         </aside>
       ) : (
-        <BottomSheet snap={snap} onSnapChange={setSnap}>
+        <BottomSheet
+          snap={snap}
+          onSnapChange={setSnap}
+          reservedTop={panelHeight}
+        >
           {(handlers) => renderSidebar(handlers)}
         </BottomSheet>
       )}
