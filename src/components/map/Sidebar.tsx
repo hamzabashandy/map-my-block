@@ -257,6 +257,8 @@ export function SidebarContent({
                 { id: "directory", label: "Directory" },
                 { id: "services", label: "Services" },
                 { id: "calendar", label: "Calendar" },
+              ] as { id: Tab; label: string }[]
+
 
             ).map((t) => {
               const active = tab === t.id;
