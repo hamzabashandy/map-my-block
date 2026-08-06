@@ -1,14 +1,17 @@
 import { Map as MapIcon, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { type Business, type CategoryId } from "../../data/businesses";
+import type { Event } from "../../lib/events";
 import type { SheetDragHandlers } from "./BottomSheet";
 import { BusinessList } from "./BusinessList";
+import { CalendarPanel } from "./CalendarPanel";
 import { CategoryPills } from "./CategoryPills";
 import { DetailPanel } from "./DetailPanel";
+import { EventProposalForm } from "./EventProposalForm";
 import { SearchBar } from "./SearchBar";
 import { ServiceSignupForm } from "./ServiceSignupForm";
 
-export type Tab = "directory" | "services";
+export type Tab = "directory" | "services" | "calendar";
 
 export const DIRECTORY_CATEGORIES: CategoryId[] = [
   "business",
@@ -35,7 +38,14 @@ type Props = {
   dragHandlers?: SheetDragHandlers;
   projectFilterName?: string | null;
   onClearProjectFilter?: () => void;
+  events: Event[];
+  eventsLoading: boolean;
+  eventsError: string | null;
+  selectedDay: string;
+  onSelectDay: (date: string) => void;
+  onSelectProject: (id: string) => void;
 };
+
 
 export function SidebarContent({
   businesses,
