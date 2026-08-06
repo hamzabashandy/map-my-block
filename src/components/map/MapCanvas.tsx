@@ -448,6 +448,7 @@ function paintMarker(
   t: number,
   state: MarkerState,
   accent: string | null,
+  eventCount = 0,
 ) {
   const cat = CATEGORIES[entry.business.category];
   const selected = state === "selected";
