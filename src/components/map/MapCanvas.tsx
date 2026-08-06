@@ -587,9 +587,37 @@ function MarkerContent({
               overflow: "hidden",
               textOverflow: "ellipsis",
               marginTop: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
             }}
           >
-            {cat.label}
+            <span
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {cat.label}
+            </span>
+            {t > 0.5 && eventCount > 0 && (
+              <span
+                style={{
+                  flexShrink: 0,
+                  background: EVENT_ACCENT,
+                  color: "#14100f",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  lineHeight: "14px",
+                  padding: "0 6px",
+                  borderRadius: 999,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {eventCount === 1 ? "1 event today" : `${eventCount} events today`}
+              </span>
+            )}
           </span>
         </span>
       )}
